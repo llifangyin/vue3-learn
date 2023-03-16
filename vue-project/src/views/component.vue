@@ -25,7 +25,7 @@ const posts = ref([
 ])
 const fontSize = ref(1)
 
-cosnt searchText = ref('')
+const searchText = ref('')
 // 全局注册的组件仍会打包，项目的依赖关系不明确
 // script setup单文件组件不需要注册直接使用
 

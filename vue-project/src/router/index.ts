@@ -43,6 +43,12 @@ const router = createRouter({
       name: 'component',
       component: () => import('../views/component.vue')
     },
+    {
+      path: '/pinia',
+      name: 'pinia',
+      component: () => import('../views/pinia.vue')
+    },
+    
     
     
   ]

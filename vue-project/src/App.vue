@@ -18,6 +18,7 @@ import HelloWorld from './components/HelloWorld.vue'
         <RouterLink to="/watch">watch</RouterLink>
         <RouterLink to="/templateRefs">templateRefs</RouterLink>
         <RouterLink to="/component">component</RouterLink>
+        <RouterLink to="/pinia">pinia</RouterLink>
         
       </nav>
     </div>
