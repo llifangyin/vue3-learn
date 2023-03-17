@@ -4,7 +4,7 @@ export const useTodos = defineStore('todos',{
     state:()=>({
         todos:[],
         filter:'all',
-        nextId:0
+        nextId:1
     }),
     getters:{
         finishedTodos(state){
