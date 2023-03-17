@@ -48,6 +48,26 @@ const router = createRouter({
       name: 'pinia',
       component: () => import('../views/pinia.vue')
     },
+    {
+      path: '/attr',
+      name: 'attr',
+      component: () => import('../views/attr.vue')
+    },
+    {
+      path: '/slot',
+      name: 'slot',
+      component: () => import('../views/slot.vue')
+    },
+    {
+      path: '/async',
+      name: 'async',
+      component: () => import('../views/async.vue')
+    },
+    {
+      path: '/innerComponent',
+      name: 'innerComponent',
+      component: () => import('../views/innerComponent.vue')
+    },
     
     
     
