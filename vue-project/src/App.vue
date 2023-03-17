@@ -20,6 +20,10 @@ import HelloWorld from './components/HelloWorld.vue'
         <RouterLink to="/async">async</RouterLink>
         <RouterLink to="/innerComponent">innerComponent</RouterLink>
         <RouterLink to="/keepalive">keepalive</RouterLink>
+        <RouterLink to="/teleport">teleport</RouterLink>
+        <RouterLink to="/composables">composables</RouterLink>
+        <RouterLink to="/directive">directive</RouterLink>
+        <RouterLink to="/plugin">plugin</RouterLink>
         
       </nav>
     </div>

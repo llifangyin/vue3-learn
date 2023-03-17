@@ -1,8 +1,15 @@
 <template>
   <div class="about">
     <h1>async component异步组件</h1>
-    <AsyncComp></AsyncComp>
     <AsyncPinia></AsyncPinia>
+    <Suspense>
+      <AsyncComp></AsyncComp>
+      <template #fallback>
+        <div>
+          正在加载...
+        </div>
+      </template>
+    </Suspense>
 </div>
 </template>
 <script  setup>

@@ -73,6 +73,26 @@ const router = createRouter({
       name: 'keepalive',
       component: () => import('../views/keepalive.vue')
     },
+    {
+      path: '/teleport',
+      name: 'teleport',
+      component: () => import('../views/teleport.vue')
+    },
+    {
+      path: '/composables',
+      name: 'composables',
+      component: () => import('../views/composables.vue')
+    },
+    {
+      path: '/directive',
+      name: 'directive',
+      component: () => import('../views/directive.vue')
+    },
+    {
+      path: '/plugin',
+      name: 'plugin',
+      component: () => import('../views/plugin.vue')
+    },
     
     
     
