@@ -19,6 +19,7 @@ import HelloWorld from './components/HelloWorld.vue'
         <RouterLink to="/slot">slot</RouterLink>
         <RouterLink to="/async">async</RouterLink>
         <RouterLink to="/innerComponent">innerComponent</RouterLink>
+        <RouterLink to="/keepalive">keepalive</RouterLink>
         
       </nav>
     </div>

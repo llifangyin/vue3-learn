@@ -68,6 +68,11 @@ const router = createRouter({
       name: 'innerComponent',
       component: () => import('../views/innerComponent.vue')
     },
+    {
+      path: '/keepalive',
+      name: 'keepalive',
+      component: () => import('../views/keepalive.vue')
+    },
     
     
     
