@@ -8,6 +8,6 @@ export default {
             },options)
         }
         app.provide('i18n',options)
-        console.log(app,options);
+        // console.log(app,options);
     }
 }

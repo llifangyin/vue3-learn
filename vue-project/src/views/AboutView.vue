@@ -1,9 +1,16 @@
 <template>
+  <H3>
+    ref在顶层访问对象中的解包
+    ref在响应式对象中的解包
+   ref在数组 map对象中作为值不会解包
+  </H3>
   <div class="about">
     <h1>This is an about page</h1>
     <div>{{ state.count }}</div>
     <button @click="increment">{{state.count }}</button>
     <h1>{{ obj.nested.count }}</h1>
+    <h1>{{ obj.arr }}</h1>
+    <br>
     <h3>
       ref在顶层属性访问会自动解包不需要.value
     </h3>
@@ -36,18 +43,19 @@ function increment(params) {
 //  对属性解构赋值的变量会失去响应式
 const raw = {}
 const proxy = reactive(raw)
-console.log(proxy == reactive(raw));
-console.log(proxy == reactive(proxy));
+console.log(proxy == reactive(raw)); //  true
+console.log(proxy == reactive(proxy)); // true
 let s = reactive({count:0})
 s = reactive({count:1})
-console.log(s,s.count);
+console.log(s,s.count,'---'); // {count: 1} 1 ---
 
 let c = s.count
 c++
-console.log(s,s.count);
+console.log(s,s.count,']]]'); // {count: 1} 1 解构赋值失去响应式
+
 let {count} = state
 count++
-console.log(s,s.count);
+console.log(s,s.count,'=='); // {count: 1} 1 解构赋值失去响应式
 
 const obj = reactive({
   nested:{count:0},
@@ -73,14 +81,14 @@ const obj1 = {
 // ref在顶层访问对象中的解包
 obj1.foo.value++
 const {foo,bar} = obj1
-console.log(foo.value,bar.value);
+console.log(foo.value,bar.value);// 2 2
 
 // ref在响应式对象中的解包
 const c2 = ref(0)
 const s2 = reactive({count:c2})
 console.log(s2);
 s2.count = 1
-console.log(c2.value);
+console.log(c2.value);// 1
 
 const books = reactive([ref('vue3')])
 console.log(books[0].value);
@@ -95,8 +103,8 @@ console.log(map.get('count').value);
 @media (min-width: 1024px) {
   .about {
     min-height: 100vh;
-    display: flex;
-    align-items: center;
+    /* display: flex;
+    align-items: center; */
   }
 }
 </style>

@@ -1,10 +1,11 @@
 
 <template>
     <div>
-        <h4>{{ title }}</h4>    
+        <h4>{{ title }}     {{ normal }}</h4>    
         <button @click="$emit('enlarge-text')">Enlarge text</button>
         <h4>
             <slot />
+            {{ normal }}
         </h4>
     </div>
 </template>

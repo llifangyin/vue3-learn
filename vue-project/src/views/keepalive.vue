@@ -18,11 +18,17 @@ import KeepA from './keepa.vue'
 import KeepB from './keepb.vue'
 import { ref,shallowRef,onActivated,onDeactivated } from 'vue'
 // 注册状态的钩子
+// 组件被包裹在 keep-alive 组件中，并且从非活动状态变为活动状态时。
+// 组件所在的路由被访问时（如果你在 Vue Router 中使用了 keep-alive）。
 onActivated(() => { 
   // / 调用时机为首次挂载
   // 以及每次从缓存中被重新插入时
   console.log(111);
 })
+// 当组件被激活时触发。这通常发生在以下情况：
+
+// 组件被包裹在 keep-alive 组件中，并且从活动状态变为非活动状态时。
+// 用户离开了组件所在的路由（如果你在 Vue Router 中使用了 keep-alive）。
 onDeactivated(() => {
   // 在从 DOM 上移除、进入缓存
   // 以及组件卸载时调用

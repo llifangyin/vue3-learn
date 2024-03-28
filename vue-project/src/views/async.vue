@@ -1,6 +1,9 @@
 <template>
+  <h4>
+    定义一个异步组件，它在运行时是懒加载的。参数可以是一个异步加载函数，或是对加载行为进行更具体定制的一个选项对象。
+  </h4>
   <div class="about">
-    <h1>async component异步组件</h1>
+    <h1>async component异步组件 (defineAsyncComponent)</h1>
     <AsyncPinia></AsyncPinia>
     <Suspense>
       <AsyncComp></AsyncComp>
@@ -25,7 +28,7 @@ const AsyncComp = defineAsyncComponent(() =>  import('./AsyncChild.vue')  )
 const AsyncPinia = defineAsyncComponent({
   loader:()=> import('./pinia.vue'),
   loadingComponent:loading,
-  delay:2000,
+  delay:3000,
   errorComponet:error,
   timeout:3000
 })

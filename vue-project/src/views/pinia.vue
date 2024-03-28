@@ -1,4 +1,9 @@
 <template>
+  <div>
+    <h4>
+      
+    </h4>
+  </div>
   <div class="about">
     <h1>pinia</h1>
     <p>
@@ -27,8 +32,8 @@ import { useActionsStore } from '@/stores/actions'
 
 const counter = useCounterStore();
 // counter.count++;
-// counter.$patch({count:counter.count+1})
-// counter.increment()
+counter.$patch({count:counter.count+1})
+counter.increment()
 const todos = useTodos()
 // todos.addTodo('test1',true)
 // todos.addTodo('test2',false)

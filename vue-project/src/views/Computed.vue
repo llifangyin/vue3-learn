@@ -1,4 +1,9 @@
 <template>
+  <h4>
+    // 计算与方法对比
+// 计算属性的值会基于其响应式依赖被缓存，响应式以来不更新不会重新计算
+// 方法调用会在渲染时再次执行
+  </h4>
   <div class="about">
     <h1>This is an computed page</h1>
     <div>
@@ -19,7 +24,7 @@ const pbMsg = computed(()=>{
   return author.books.length>0?'yes':"no"
 })
 // 返回一个ComputedRefImpl 对象，跟一般的ref类似，会自动解包
-console.log(pbMsg);
+console.log(pbMsg); // ComputedRefImpl {_value: "yes", dep: ReactiveEffect {...}}
 // 计算与方法对比
 // 计算属性的值会基于其响应式依赖被缓存，响应式以来不更新不会重新计算
 // 方法调用会在渲染时再次执行
@@ -28,7 +33,7 @@ const firstName = ref('john')
 const lastName = ref('Doe')
 let  fullName = computed({
   get(){
-    return firstName.value + '' + lastName.value
+    return firstName.value + ',' + lastName.value
   },
   set(newVal){
     [firstName.value,lastName.value] = newVal.split(' ')
