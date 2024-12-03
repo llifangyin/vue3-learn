@@ -10,7 +10,7 @@
 
 + 编译优化 
 1. 运行时patch优化
-2. block tree 更新新能=> 动态内容的数量
+2. block tree 嵌套更新速度：模块的大小=> 动态内容的数量
 
 + 语法优化
 1. Composintion API
@@ -19,4 +19,8 @@
 1. mixins vue2
 2. hook vue3 
 
-+ RFC 每个版本改动可控(Request for comment)
++ RFC (git) 每个版本改动可控(Request for comment)
+
+
+## Composition API
+
