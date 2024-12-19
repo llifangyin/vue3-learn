@@ -7,7 +7,8 @@ import router from './router'
 import './assets/main.css'
 
 import i18nPlugin from './plulgin/i18n'
-
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 const app = createApp(App)
 app.use(i18nPlugin,{
     greetings:{
@@ -15,6 +16,7 @@ app.use(i18nPlugin,{
     }
 })
 app.use(createPinia())
+app.use(ElementPlus)
 app.use(router)
 
 app.mount('#app')

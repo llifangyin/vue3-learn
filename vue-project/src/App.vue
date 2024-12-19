@@ -1,97 +1,50 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
 
 <template>
-  <header>
-    <div class="wrapper">
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-        <RouterLink to="/computed">computed</RouterLink>
-        <RouterLink to="/lifecycle">lifecycle</RouterLink>
-        <RouterLink to="/watch">watch</RouterLink>
-        <RouterLink to="/templateRefs">templateRefs</RouterLink>
-        <RouterLink to="/component">component</RouterLink>
-        <RouterLink to="/pinia">pinia</RouterLink>
-        <RouterLink to="/attr">attr</RouterLink>
-        <RouterLink to="/slot">slot</RouterLink>
-        <RouterLink to="/async">async</RouterLink>
-        <RouterLink to="/innerComponent">innerComponent</RouterLink>
-        <RouterLink to="/keepalive">keepalive</RouterLink>
-        <RouterLink to="/teleport">teleport</RouterLink>
-        <RouterLink to="/composables">composables</RouterLink>
-        <RouterLink to="/directive">directive</RouterLink>
-        <RouterLink to="/plugin">plugin</RouterLink>
-        
-      </nav>
-    </div>
-  </header>
+    <el-container>
+      <el-header style="height: 70px;">
+          <el-tabs tab-position="top" @tab-click="handleClick ">
+            <el-tab-pane label="Api" name="/api">
+              <RouterLink to="/api/global">全局api</RouterLink>
+            </el-tab-pane>
+            <el-tab-pane label="Guide" name="/guide">
+              <el-space wrap>
+                <RouterLink to="/guide/about">About</RouterLink>
+                <RouterLink to="/guide/computed">computed</RouterLink>
+                <RouterLink to="/guide/lifecycle">lifecycle</RouterLink>
+                <RouterLink to="/guide/watch">watch</RouterLink>
+                <RouterLink to="/guide/templateRefs">templateRefs</RouterLink>
+                <RouterLink to="/guide/component">component</RouterLink>
+                <RouterLink to="/guide/pinia">pinia</RouterLink>
+                <RouterLink to="/guide/attr">attr</RouterLink>
+                <RouterLink to="/guide/slot">slot</RouterLink>
+                <RouterLink to="/guide/async">async</RouterLink>
+                <RouterLink to="/guide/innerComponent">innerComponent</RouterLink>
+                <RouterLink to="/guide/keepalive">keepalive</RouterLink>
+                <RouterLink to="/guide/teleport">teleport</RouterLink>
+                <RouterLink to="/guide/composables">composables</RouterLink>
+                <RouterLink to="/guide/directive">directive</RouterLink>
+                <RouterLink to="/guide/plugin">plugin</RouterLink>
+              </el-space>
+            </el-tab-pane>
+          </el-tabs>
+      </el-header>
+      <el-main>
+        <RouterView />
+      </el-main>
+    </el-container>
 
-  <RouterView />
 </template>
+<script setup lang="ts">
+import { RouterLink, RouterView } from 'vue-router'
+import { ref } from 'vue'
+import type { TabsPaneContext } from 'element-plus'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+const activeName = ref('first')
+const handleClick = (tab: TabsPaneContext, event: Event) => {
+  router.push(tab.paneName as string)
+}
+</script>
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
 </style>
