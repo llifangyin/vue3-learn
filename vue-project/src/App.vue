@@ -4,7 +4,13 @@
       <el-header style="height: 70px;">
           <el-tabs tab-position="top" @tab-click="handleClick ">
             <el-tab-pane label="Api" name="/api">
-              <RouterLink to="/api/global">全局api</RouterLink>
+              <el-space wrap>
+                <RouterLink to="/api/global">全局api</RouterLink>
+                <RouterLink to="/api/setup">setup</RouterLink>
+                <RouterLink to="/api/reactivity-core">reactivity-core</RouterLink>
+                <RouterLink to="/api/reactivity-utilities">reactivity-utilities</RouterLink>
+                
+              </el-space>
             </el-tab-pane>
             <el-tab-pane label="Guide" name="/guide">
               <el-space wrap>

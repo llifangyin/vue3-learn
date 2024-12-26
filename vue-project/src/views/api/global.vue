@@ -41,8 +41,9 @@
 
     app.mixin() //全局注册一个混入，影响注册之后所有创建的每个应用实例。
 
-    pp.provide() // 注册一个全局的依赖注入，可以在任何后代组件中使用 inject 注入它。
+    app.provide() // 注册一个全局的依赖注入，可以在任何后代组件中使用 inject 注入它。
     app.provide('message', 'hello') // 注册一个名为 'message' 的依赖注入，值为 'hello'。
+
     import { inject } from 'vue'
     export default {
       setup() {
@@ -99,7 +100,10 @@ async function increment() {
   // DOM 还未更新
   console.log(document.getElementById('counter').textContent) // 0
 
-  await nextTick()
+  await nextTick(()=>{
+    console.log('nextTick')
+    console.log(document.getElementById('counter').textContent) // 1
+  })
   // DOM 此时已经更新
   console.log(document.getElementById('counter').textContent) // 1
 }

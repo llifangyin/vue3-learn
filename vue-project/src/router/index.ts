@@ -106,7 +106,23 @@ const router = createRouter({
           path: 'global',
           name: 'global',
           component: () => import('../views/api/global.vue')
-        }]
+        },
+        {
+          path: 'setup',
+          name: 'setup',
+          component: () => import('../views/api/setup.vue')
+        },
+        {
+          path: 'reactivity-core',
+          name: 'reactivity-core',
+          component: () => import('../views/api/reactivity-core.vue')
+        },
+        {
+          path: 'reactivity-utilities',
+          name: 'reactivity-utilities',
+          component: () => import('../views/api/reactivity-utilities.vue')
+        },
+      ]
       }
   ]
 })
