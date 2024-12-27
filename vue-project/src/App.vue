@@ -9,6 +9,7 @@
                 <RouterLink to="/api/setup">setup</RouterLink>
                 <RouterLink to="/api/reactivity-core">reactivity-core</RouterLink>
                 <RouterLink to="/api/reactivity-utilities">reactivity-utilities</RouterLink>
+                <RouterLink to="/api/reactivity-advanced">reactivity-advanced</RouterLink>
                 
               </el-space>
             </el-tab-pane>

@@ -122,6 +122,11 @@ const router = createRouter({
           name: 'reactivity-utilities',
           component: () => import('../views/api/reactivity-utilities.vue')
         },
+        {
+          path: 'reactivity-advanced',
+          name: 'reactivity-advanced',
+          component: () => import('../views/api/reactivity-advanced.vue')
+        },
       ]
       }
   ]

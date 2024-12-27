@@ -14,7 +14,7 @@ import { ref ,h,toRefs,toRef,computed,reactive,watchEffect,readonly, watchPostEf
 // 可读的计算属性ref
 const count = ref(0);
 const plusOne = computed(() => count.value + 1);
-plusOne.value ++ //不执行
+// plusOne.value ++ //不执行
 
 // console.log(plusOne.value,'plusone'); // 1
 // console.log(count.value,'count'); // 0
