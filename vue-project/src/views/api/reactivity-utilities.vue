@@ -1,4 +1,3 @@
-import { shallowRef } from 'vue';
 <template>
   <div>
     <h3>isRef: 检查某个值是否是ref</h3>

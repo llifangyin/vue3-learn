@@ -127,6 +127,21 @@ const router = createRouter({
           name: 'reactivity-advanced',
           component: () => import('../views/api/reactivity-advanced.vue')
         },
+        {
+          path: 'lifecycle',
+          name: 'lifecycle',
+          component: () => import('../views/api/lifecycle.vue')
+        },
+        {
+          path: 'injection',
+          name: 'injection',
+          component: () => import('../views/api/injection.vue')
+        },
+        {
+          path: 'helpers',
+          name: 'helpers',
+          component: () => import('../views/api/helpers.vue')
+        },
       ]
       }
   ]

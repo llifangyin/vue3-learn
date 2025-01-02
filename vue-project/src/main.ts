@@ -20,4 +20,5 @@ app.use(createPinia())
 app.use(ElementPlus)
 app.use(router)
 
+app.provide('appName', 'Vue 3 App')
 app.mount('#app')
