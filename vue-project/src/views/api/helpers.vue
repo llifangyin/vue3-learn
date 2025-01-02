@@ -6,8 +6,11 @@
     <h3>useTemplateRef 返回一个浅层ref,其值将与模板汇总的具有匹配ref attrubute的元素或组件同步</h3>
     <input type="text" ref="input" :id='id' />
     <h3>useId 用于为无障碍属性或者表单生产每个应用内唯一id</h3>
+    <!-- <input type="text" :value="title" placeholder="Title" /> -->
    </div>
 </template>
+
+
 <script setup>
 import { ref ,h,toRefs,toRef,computed,
 useTemplateRef  ,onMounted,useId
@@ -20,6 +23,7 @@ useTemplateRef  ,onMounted,useId
     console.log(inputRef.value)
     console.log(id)
   })
+
 </script>
 <!-- <script>
   export default {
