@@ -13,6 +13,8 @@
                 <RouterLink to="/api/lifecycle">lifecycle</RouterLink>
                 <RouterLink to="/api/injection">injection</RouterLink>
                 <RouterLink to="/api/helpers">helpers</RouterLink>
+                <RouterLink to="/api/builtInDirective">builtInDirective</RouterLink>
+                <RouterLink to="/api/builtInComp">builtInComp</RouterLink>
                 
                 
               </el-space>

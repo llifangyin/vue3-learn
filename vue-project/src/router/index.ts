@@ -142,6 +142,17 @@ const router = createRouter({
           name: 'helpers',
           component: () => import('../views/api/helpers.vue')
         },
+        {
+          path: 'builtInDirective',
+          name: 'builtInDirective',
+          component: () => import('../views/api/builtInDirective.vue')
+        },
+        {
+          path: 'builtInComp',
+          name: 'builtInComp',
+          component: () => import('../views/api/builtInComp.vue')
+        },
+        
       ]
       }
   ]

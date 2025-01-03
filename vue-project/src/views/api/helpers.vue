@@ -7,6 +7,14 @@
     <input type="text" ref="input" :id='id' />
     <h3>useId 用于为无障碍属性或者表单生产每个应用内唯一id</h3>
     <!-- <input type="text" :value="title" placeholder="Title" /> -->
+     <helpers-sub :id="id1" @click="()=>console.log(111)">
+      <template #default>
+        <p>This is the default slot content.</p>
+      </template>
+      <template #namedSlot> 
+        <p>This is the named slot content.</p>
+      </template>
+     </helpers-sub>
    </div>
 </template>
 
@@ -16,6 +24,7 @@ import { ref ,h,toRefs,toRef,computed,
 useTemplateRef  ,onMounted,useId
 
 } from 'vue';
+import helpersSub from './helpersSub.vue';
 // useAttrs 选项是setup(props,context) 
   const inputRef = useTemplateRef('input')
   const id = useId()
@@ -23,7 +32,7 @@ useTemplateRef  ,onMounted,useId
     console.log(inputRef.value)
     console.log(id)
   })
-
+  const id1 = useId()
 </script>
 <!-- <script>
   export default {
