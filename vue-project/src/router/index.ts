@@ -152,7 +152,11 @@ const router = createRouter({
           name: 'builtInComp',
           component: () => import('../views/api/builtInComp.vue')
         },
-        
+        {
+          path: 'sfc',
+          name: 'sfc',
+          component: () => import('../views/api/sfc.vue')
+        },
       ]
       }
   ]

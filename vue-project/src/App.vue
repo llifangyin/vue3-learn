@@ -15,6 +15,7 @@
                 <RouterLink to="/api/helpers">helpers</RouterLink>
                 <RouterLink to="/api/builtInDirective">builtInDirective</RouterLink>
                 <RouterLink to="/api/builtInComp">builtInComp</RouterLink>
+                <RouterLink to="/api/sfc">sfc</RouterLink>
                 
                 
               </el-space>
