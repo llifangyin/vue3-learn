@@ -61,9 +61,9 @@ const theme = ref({
   <h2>CSS功能</h2>
   <h3>scoped css</h3>
   <h4>使用scoped 子元素的根元素会同时被父组件和子组件的作用影响</h4>
-  <h4>:deep()伪类 深度选择器 </h4>
+  <h4>:deep()伪类 深度选择器 ,例如可以影响到子组件</h4>
   <h4>:slotted(div) 插槽选择器</h4>
-  <h4>:global(div)全局选择器 不用另起一个style </h4>
+  <h4>:global(div)全局选择器 不用另起一个style 跳出scope :global(h4) </h4>
   
   <h3>css modules : 使用：$style.xxx  暴漏style module</h3>
   <div :class="$style.title">css module</div>

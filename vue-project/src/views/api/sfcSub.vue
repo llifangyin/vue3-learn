@@ -9,6 +9,7 @@ const emit = defineEmits(['submit'])
 // 引入的选项会从setup中提升到模板的作用域
 //defineModel v-model 可以在组件上使用以实现双向绑定
 // const modelvalue = defineModel({ default: '1111',})
+// modelModifiers修饰器
 const [modelvalue,modelModifiers] = defineModel({ 
   set(value){
     if(modelModifiers.trim){
@@ -67,7 +68,7 @@ export default {
   <slot></slot>
   <h3 >{{ msg }}</h3>
   <input type="text"  v-model.trim="modelvalue">
-  <button :id="$attrs.id" @click="emit('submit')">submit</button>
+  <button :id="$attrs.id" @click="emit('submit')" >submit</button>
   </div>
 </template>
 <style scoped>

@@ -16,6 +16,7 @@
                 <RouterLink to="/api/builtInDirective">builtInDirective</RouterLink>
                 <RouterLink to="/api/builtInComp">builtInComp</RouterLink>
                 <RouterLink to="/api/sfc">sfc</RouterLink>
+                <RouterLink to="/api/enhance">enhance</RouterLink>
                 
                 
               </el-space>

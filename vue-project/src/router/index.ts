@@ -128,9 +128,9 @@ const router = createRouter({
           component: () => import('../views/api/reactivity-advanced.vue')
         },
         {
-          path: 'lifecycle',
-          name: 'lifecycle',
-          component: () => import('../views/api/lifecycle.vue')
+          path: 'lifecycleApi',
+          name: 'lifecycleApi',
+          component: () => import('../views/api/lifecycleApi.vue')
         },
         {
           path: 'injection',
@@ -157,6 +157,12 @@ const router = createRouter({
           name: 'sfc',
           component: () => import('../views/api/sfc.vue')
         },
+        {
+          path: 'enhance',
+          name: 'enhance',
+          component: () => import('../views/api/enhance.vue')
+        },
+        
       ]
       }
   ]
