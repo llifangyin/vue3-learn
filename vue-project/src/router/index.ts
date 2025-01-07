@@ -167,6 +167,11 @@ const router = createRouter({
           name: 'enhanceSsr',
           component: () => import('../views/api/enhanceSsr.vue')
         },
+        {
+          path: 'utilityTypes',
+          name: 'utilityTypes',
+          component: () => import('../views/api/utilityTypes.vue')
+        },
         
       ]
       }

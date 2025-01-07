@@ -18,6 +18,7 @@
                 <RouterLink to="/api/sfc">sfc</RouterLink>
                 <RouterLink to="/api/enhance">enhance</RouterLink>
                 <RouterLink to="/api/enhanceSsr">enhanceSsr</RouterLink>
+                <RouterLink to="/api/utilityTypes">utilityTypes</RouterLink>
                 
                 
               </el-space>
