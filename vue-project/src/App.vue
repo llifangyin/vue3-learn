@@ -1,7 +1,7 @@
 
 <template>
     <el-container>
-      <el-header style="height: 70px;">
+      <el-header style="height: 140px;">
           <el-tabs tab-position="top" @tab-click="handleClick ">
             <el-tab-pane label="Api" name="/api">
               <el-space wrap>
@@ -17,6 +17,7 @@
                 <RouterLink to="/api/builtInComp">builtInComp</RouterLink>
                 <RouterLink to="/api/sfc">sfc</RouterLink>
                 <RouterLink to="/api/enhance">enhance</RouterLink>
+                <RouterLink to="/api/enhanceSsr">enhanceSsr</RouterLink>
                 
                 
               </el-space>
