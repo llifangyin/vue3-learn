@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",    // 输出目录
+    "target": "es2016",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
+    "sourceMap": true,
+    "strict": false,                                      /* Enable all strict type-checking options. */
+    "resolveJsonModule": true,                           /* Include modules imported with '.json' extension. */
+    "jsx": "preserve",
+    "lib": ["esnext", "dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@vue/*": ["packages/*/src"] // 配置路径别名
+    }
+  }
+}

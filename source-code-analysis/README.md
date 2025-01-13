@@ -1,6 +1,10 @@
 ## vue3优化概述
 
 + monorepo 代码管理方式
+1. pnpm-workspace.yaml package声明，
+2. pkg.json 里workspaces声明
+3. tsconfig里baseUrl paths声明，公共模块的别名
+4. npmrc文件里 shamefully-hoist 依赖提升到根目录
 + typescript 类型语言
 + FLOW静态类型检查 => typescript 类型检查
 + tree-shaking 减少打包体积（不会打包没有引入的组件）
@@ -24,3 +28,10 @@
 
 ## Composition API
 
+### minimist 解析参数命令
+```js
+// "dev": " node scripts/dev.js reactivity -f esm",
+const args = minimist( process.argv.slice(2));
+const target = args._[0] || "reactivity";// 要打包的模块 
+const formats = args.f || "iife";// 打包的格式 iife umd esm
+```
