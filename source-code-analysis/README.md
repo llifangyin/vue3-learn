@@ -33,5 +33,39 @@
 // "dev": " node scripts/dev.js reactivity -f esm",
 const args = minimist( process.argv.slice(2));
 const target = args._[0] || "reactivity";// 要打包的模块 
-const formats = args.f || "iife";// 打包的格式 iife umd esm
+const formats = args.f || "iife";// 打包的格式 iife(立即执行，默认值) cjs esm
+```
+```js
+import { isObject } from '@vue/shared';
+
+console.log(isObject('abc')); 
+console.log(isObject({})); 
+```
+```js
+// iife
+(() => {
+  // packages/shared/src/index.ts
+  function isObject(value) {
+    return typeof value === "object" && value !== null;
+  }
+
+  // packages/reactivity/src/index.ts
+  console.log(isObject("abc"));
+  console.log(isObject({}));
+})();
+//# sourceMappingURL=reactivity.js.map
+
+```
+```js
+// esm cjs
+// packages/shared/src/index.ts
+function isObject(value) {
+  return typeof value === "object" && value !== null;
+}
+
+// packages/reactivity/src/index.ts
+console.log(isObject("abc"));
+console.log(isObject({}));
+//# sourceMappingURL=reactivity.js.map
+
 ```

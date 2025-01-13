@@ -1,2 +1,4 @@
 import { isObject } from '@vue/shared';
-// pnpm install @vue/shared --workspace --filter @vue/reactivity
+
+console.log(isObject('abc')); 
+console.log(isObject({})); 
