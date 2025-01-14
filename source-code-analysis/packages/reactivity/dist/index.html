@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script type="module">
+        import { reactive ,effect} from './reactivity.js'
+        let obj = {
+            name: 'lisi',
+            age: 18
+        }
+        const state1 = reactive(obj)
+        //   state1被代理过 一定有get set方法
+        // console.log(state1 == state2, 'state')
+        // console.log(state1.name, 'state1.name')
+        effect(() => {
+            app.innerHTML = `name ${state1.name} age ${state1.age}`
+        })
+        // effect(() => {
+        //     app.innerHTML = `name ${state1.name} `
+        // })
+        setTimeout(() => {
+            state1.age++
+        }, 1000)
+
+        // effect(() => {
+        //     console.log(state1.name, 'state1.name')
+        //     effect(() => {
+        //         console.log(state1.name, 'state1.name')
+        //     })
+        //     console.log(state1.age, 'state1.name')
+        // })
+        // _effect.run()
+    </script>
+</body>
+</html>

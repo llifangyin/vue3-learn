@@ -1,3 +1,4 @@
+[bilibili](https://www.bilibili.com/video/BV1SJq8YwEnd?vd_source=5f81aa32e3d31be9ce29a6f3bdb44718&p=4&spm_id_from=333.788.videopod.episodes)
 ## vue3优化概述
 
 + monorepo 代码管理方式
