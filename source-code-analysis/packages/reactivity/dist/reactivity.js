@@ -82,6 +82,7 @@ function track(target, key) {
     }
     trackEffect(activeEffect, dep);
     console.log(targetMap, "targetMap");
+    console.log(activeEffect, dep, "===");
   }
 }
 function trigger(target, key, value, oldValue) {

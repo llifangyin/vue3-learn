@@ -30,6 +30,7 @@ export function track(target,key){
         // 后续可以根据值的变化触发此dep中存放的effect
         trackEffect(activeEffect,dep);
         console.log(targetMap,'targetMap')
+        console.log(activeEffect,dep,'===')
     }
 }
     //  使用示例：
