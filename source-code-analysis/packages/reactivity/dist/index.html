@@ -11,21 +11,35 @@
         import { reactive ,effect} from './reactivity.js'
         let obj = {
             name: 'lisi',
-            age: 18
+            age: 18,
+            flag:true
         }
         const state1 = reactive(obj)
         //   state1被代理过 一定有get set方法
         // console.log(state1 == state2, 'state')
         // console.log(state1.name, 'state1.name')
         effect(() => {
-            app.innerHTML = `name ${state1.name} age ${state1.age}`
+            app.innerHTML = state1.flag ? `name ${state1.name} `:` age ${state1.age}`
+            // flag true
+            // {obj:{flag:{effect},name:{effect}}}
+            // flag false 不需要name的effect了
+            // {obj:{flag:{effect},age:{effect}}}
+            // app.innerHTML = state1.flag + state1.flag + state1.flag
         })
         // effect(() => {
         //     app.innerHTML = `name ${state1.name} `
         // })
         setTimeout(() => {
-            state1.age++
+            // state1.age++
+            state1.flag = false
+            // setTimeout(() => {
+            //     state1.name = 'wangwu' 
+            //     // 修改后不应该触发effect 因为没有使用
+            // }, 1000);
         }, 1000)
+
+        // 需要一个算法，对比不同分支切换的差异
+        // {flag,name}  {flag,age}
 
         // effect(() => {
         //     console.log(state1.name, 'state1.name')

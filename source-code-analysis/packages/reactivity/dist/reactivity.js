@@ -12,6 +12,10 @@ function effect(fn, option) {
   return _effect;
 }
 var activeEffect;
+function preCleanEffect(effect2) {
+  effect2._depsLength = 0;
+  effect2._trackId++;
+}
 var ReactiveEffect = class {
   // 如果fn中依赖的数据发生变化后，需要重新调用scheduler => _effect.run
   constructor(fn, scheduler) {
@@ -34,16 +38,35 @@ var ReactiveEffect = class {
     let lastEffect = activeEffect;
     try {
       activeEffect = this;
+      preCleanEffect(this);
       return this.fn();
     } finally {
       activeEffect = lastEffect;
     }
   }
 };
+function cleanDepEffect(dep, effect2) {
+  dep.delete(effect2);
+  if (dep.size == 0) {
+    dep.cleanup();
+  }
+}
 function trackEffect(effect2, dep) {
-  dep.set(effect2, effect2._trackId);
-  effect2.deps[effect2._depsLength++] = dep;
-  console.log(effect2.deps, "effect.deps");
+  console.log(dep.get(effect2), effect2._trackId, "dep.get(effect)");
+  console.log(effect2, "effect");
+  if (dep.get(effect2) !== effect2._trackId) {
+    dep.set(effect2, effect2._trackId);
+    let oldDep = effect2.deps[effect2._depsLength];
+    if (oldDep !== dep) {
+      if (oldDep) {
+        cleanDepEffect(oldDep, effect2);
+      } else {
+        effect2.deps[effect2._depsLength++] = dep;
+      }
+    } else {
+      effect2._depsLength++;
+    }
+  }
 }
 function triggerEffect(dep) {
   for (const effect2 of dep.keys()) {
@@ -55,9 +78,9 @@ function triggerEffect(dep) {
 
 // packages/reactivity/src/reactiveEffect.ts
 var targetMap = /* @__PURE__ */ new WeakMap();
-var createDep = (cleanUp, key) => {
+var createDep = (cleanup, key) => {
   const dep = /* @__PURE__ */ new Map();
-  dep.cleanUp = cleanUp;
+  dep.cleanup = cleanup;
   dep.name = key;
   return dep;
 };
@@ -81,8 +104,6 @@ function track(target, key) {
       );
     }
     trackEffect(activeEffect, dep);
-    console.log(targetMap, "targetMap");
-    console.log(activeEffect, dep, "===");
   }
 }
 function trigger(target, key, value, oldValue) {
@@ -92,7 +113,6 @@ function trigger(target, key, value, oldValue) {
   }
   let dep = depMap.get(key);
   if (dep) {
-    console.log(dep, "dep");
     triggerEffect(dep);
   }
 }

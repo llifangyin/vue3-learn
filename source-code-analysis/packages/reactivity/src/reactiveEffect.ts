@@ -1,9 +1,9 @@
 import { activeEffect,trackEffect,triggerEffect } from "./effect"
 
 const targetMap = new WeakMap();//不会导致内存泄漏 存放收集的关系
-export const createDep = (cleanUp,key)=>{
+export const createDep = (cleanup,key)=>{
     const dep = new Map() as any;//创建的收集器还是个map
-    dep.cleanUp = cleanUp; 
+    dep.cleanup = cleanup; 
     dep.name = key ;//自定义的标识映射表给哪个属性服务的 
     return dep
 }
@@ -29,8 +29,9 @@ export function track(target,key){
         //将当前的effect放入dep（映射表）中，
         // 后续可以根据值的变化触发此dep中存放的effect
         trackEffect(activeEffect,dep);
-        console.log(targetMap,'targetMap')
-        console.log(activeEffect,dep,'===')
+        // console.log(dep,'dep==')
+        // console.log(targetMap,'targetMap')
+        // console.log(activeEffect,dep,'===')
     }
 }
     //  使用示例：
@@ -62,7 +63,7 @@ export function track(target,key){
         let dep = depMap.get(key)
         if(dep){
             // 触发更新
-            console.log(dep,'dep')
+            // console.log(dep,'dep')
             triggerEffect(dep)
         }
 

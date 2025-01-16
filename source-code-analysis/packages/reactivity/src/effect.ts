@@ -8,7 +8,12 @@ export function effect (fn,option?) {
     return _effect
 }
 export let activeEffect ;
+function preCleanEffect(effect){
+    // console.log(effect,'pre')
+    effect._depsLength = 0
+    effect._trackId ++ // 每次执行id+1, 如果同一个effect执行，id就是相同的
 
+}
 // effectScope.stop() // 停止依赖收集 不参加响应式处理
 class ReactiveEffect{
     _trackId= 0;//记录effect执行的次数
@@ -29,7 +34,11 @@ class ReactiveEffect{
         // 把当前的 ReactiveEffect 放到全局上， 可供依赖收集
         try{
             activeEffect = this
-            return this.fn()
+            // effect重新执行前，将上一次的依赖清空
+            preCleanEffect(this) // 每一次调用effect的fun时，
+            // 将effect的_trackId++
+            // 保证同一个effect执行，id相同
+            return this.fn() // track -> trackEffect(重新收集依赖)
         }
         finally{
             activeEffect = lastEffect //防止嵌套，保证收集的是当前的effect
@@ -37,19 +46,60 @@ class ReactiveEffect{
     }
 }
 
+function cleanDepEffect(dep,effect){
+    dep.delete(effect)
+    if(dep.size == 0){ //map为空 属性删完了
+        dep.cleanup()//把自己删除
+    }
+}
 // 双向记忆
 export function trackEffect(effect,dep){
-    dep.set(effect, effect._trackId)
-    // 将effect和dep关联起来
-    effect.deps[ effect._depsLength++] = dep
-    console.log(effect.deps,'effect.deps')
+    
+    // dep.set(effect, effect._trackId)
+    // // 将effect和dep关联起来
+    // effect.deps[ effect._depsLength++] = dep
+    
+    // 重新收集依赖 将不需要的依赖清除
+    
+    // dep.get(effect) 第一次undefined
+    // effect._trackId  渲染的次数 effect调用的次数
+    // trackid用于记录执行的次数，防止一个属性在一个effect中多次收集
+    console.log(dep.get(effect),effect._trackId,'dep.get(effect)')
+    console.log(effect,'effect')
+    if(dep.get(effect) !== effect._trackId){
+        //  依赖收集
+        dep.set(effect, effect._trackId) 
+        // console.log('优化了多余的收集')
+        let oldDep = effect.deps[ effect._depsLength]
+        // 没有存过 初始化 第0个没有
+        if(oldDep!==dep){
+            if(oldDep){
+                // 删除旧的，换新的
+                cleanDepEffect(oldDep,effect)
+            }else{
+                // {flag,name}
+                // {flag,age}
+                // 永远按照最新的收集顺序存放
+                effect.deps[effect._depsLength++] = dep
+            }
+
+        }else{
+            effect._depsLength++
+        }
+
+
+    }
+    
 }
 
 // 触发更新
 export function triggerEffect(dep){
     // dep 属性的映射表
+    // console.log(dep.keys(),'dep.keys()')
     for(const effect of dep.keys()){
         // 触发更新
+        // console.log(effect,'effect')    
+        // cleanUp name是dep.xxx赋值的，for of遍历不到
         if(effect.scheduler){
             effect.scheduler() // => effect.run
         }
