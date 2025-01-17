@@ -12,6 +12,7 @@
         let obj = {
             name: 'lisi',
             age: 18,
+            test:'test',
             flag:true
         }
         const state1 = reactive(obj)
@@ -19,7 +20,7 @@
         // console.log(state1 == state2, 'state')
         // console.log(state1.name, 'state1.name')
         effect(() => {
-            app.innerHTML = state1.flag ? `name ${state1.name} `:` age ${state1.age}`
+            app.innerHTML = state1.flag ? `name ${state1.name} test ${state1.test}`:` age ${state1.age}`
             // flag true
             // {obj:{flag:{effect},name:{effect}}}
             // flag false 不需要name的effect了

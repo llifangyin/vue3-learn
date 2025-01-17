@@ -16,6 +16,14 @@ function preCleanEffect(effect2) {
   effect2._depsLength = 0;
   effect2._trackId++;
 }
+function postCleanEffect(effect2) {
+  if (effect2.deps.length > effect2._depsLength) {
+    for (let i = effect2._depsLength; i < effect2.deps.length; i++) {
+      cleanDepEffect(effect2.deps[i], effect2);
+    }
+    effect2.deps.length = effect2._depsLength;
+  }
+}
 var ReactiveEffect = class {
   // 如果fn中依赖的数据发生变化后，需要重新调用scheduler => _effect.run
   constructor(fn, scheduler) {
@@ -41,6 +49,7 @@ var ReactiveEffect = class {
       preCleanEffect(this);
       return this.fn();
     } finally {
+      postCleanEffect(this);
       activeEffect = lastEffect;
     }
   }
@@ -52,17 +61,14 @@ function cleanDepEffect(dep, effect2) {
   }
 }
 function trackEffect(effect2, dep) {
-  console.log(dep.get(effect2), effect2._trackId, "dep.get(effect)");
-  console.log(effect2, "effect");
   if (dep.get(effect2) !== effect2._trackId) {
     dep.set(effect2, effect2._trackId);
     let oldDep = effect2.deps[effect2._depsLength];
     if (oldDep !== dep) {
       if (oldDep) {
         cleanDepEffect(oldDep, effect2);
-      } else {
-        effect2.deps[effect2._depsLength++] = dep;
       }
+      effect2.deps[effect2._depsLength++] = dep;
     } else {
       effect2._depsLength++;
     }

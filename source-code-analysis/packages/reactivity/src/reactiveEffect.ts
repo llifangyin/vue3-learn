@@ -1,6 +1,6 @@
 import { activeEffect,trackEffect,triggerEffect } from "./effect"
 
-const targetMap = new WeakMap();//不会导致内存泄漏 存放收集的关系
+export const targetMap = new WeakMap();//不会导致内存泄漏 存放收集的关系
 export const createDep = (cleanup,key)=>{
     const dep = new Map() as any;//创建的收集器还是个map
     dep.cleanup = cleanup; 

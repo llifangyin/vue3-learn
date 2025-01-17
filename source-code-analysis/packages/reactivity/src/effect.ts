@@ -1,3 +1,4 @@
+import { targetMap } from './reactiveEffect'
 export function effect (fn,option?) {
 // 创建一个响应式effect，数据变化后重新执行
     const _effect  = new ReactiveEffect(fn,()=>{
@@ -13,6 +14,17 @@ function preCleanEffect(effect){
     effect._depsLength = 0
     effect._trackId ++ // 每次执行id+1, 如果同一个effect执行，id就是相同的
 
+}
+function postCleanEffect(effect){
+//    [flag,age,xxx,bbb,ccc]
+// [flag-> effect._depslength = 1]
+    if(effect.deps.length >  effect._depsLength){
+        // 超过的删除
+        for(let i = effect._depsLength; i<effect.deps.length;i++){
+                cleanDepEffect(effect.deps[i],effect)//删除映射表中的effect
+        }
+        effect.deps.length = effect._depsLength // 更新依赖表的长度
+    }
 }
 // effectScope.stop() // 停止依赖收集 不参加响应式处理
 class ReactiveEffect{
@@ -41,6 +53,7 @@ class ReactiveEffect{
             return this.fn() // track -> trackEffect(重新收集依赖)
         }
         finally{
+            postCleanEffect(this)
             activeEffect = lastEffect //防止嵌套，保证收集的是当前的effect
         }
     }
@@ -48,12 +61,12 @@ class ReactiveEffect{
 
 function cleanDepEffect(dep,effect){
     dep.delete(effect)
-    if(dep.size == 0){ //map为空 属性删完了
+    if(dep.size == 0){ // 删除总映射表 targetMap里的属性effect
         dep.cleanup()//把自己删除
     }
 }
 // 双向记忆
-export function trackEffect(effect,dep){
+export function trackEffect(effect,dep){ 
     
     // dep.set(effect, effect._trackId)
     // // 将effect和dep关联起来
@@ -64,8 +77,8 @@ export function trackEffect(effect,dep){
     // dep.get(effect) 第一次undefined
     // effect._trackId  渲染的次数 effect调用的次数
     // trackid用于记录执行的次数，防止一个属性在一个effect中多次收集
-    console.log(dep.get(effect),effect._trackId,'dep.get(effect)')
-    console.log(effect,'effect')
+    // console.log(dep.get(effect),effect._trackId,'dep.get(effect)')
+    // console.log(effect,'effect')
     if(dep.get(effect) !== effect._trackId){
         //  依赖收集
         dep.set(effect, effect._trackId) 
@@ -76,20 +89,18 @@ export function trackEffect(effect,dep){
             if(oldDep){
                 // 删除旧的，换新的
                 cleanDepEffect(oldDep,effect)
-            }else{
-                // {flag,name}
-                // {flag,age}
-                // 永远按照最新的收集顺序存放
-                effect.deps[effect._depsLength++] = dep
             }
-
+            // {flag,name}
+            // {flag,age}
+            // effect.deps -> 永远按照最新的收集顺序存放
+            effect.deps[effect._depsLength++] = dep
         }else{
             effect._depsLength++
         }
-
-
+        // console.log(effect,111)
+        // console.log(targetMap,'targetMap')
     }
-    
+
 }
 
 // 触发更新
