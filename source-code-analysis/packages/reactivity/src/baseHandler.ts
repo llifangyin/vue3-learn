@@ -1,4 +1,6 @@
+import { isObject } from "@vue/shared"
 import { track,trigger } from "./reactiveEffect"
+import { reactive } from "./reactive"
 
 export enum ReactiveFlags{
     IS_REACTIVE = '__v_isReactive',// 标识是否是响应式对象
@@ -14,6 +16,11 @@ export const mutableHandlers = {
         // console.log(receiver,'receiver')
         // 依赖收集
         track(target,key)//收集属性，和effect关联在一起
+
+        let res = Reflect.get(target,key,receiver)
+        if(isObject(res)){ // 如果是对象，递归代理
+            return reactive(res)
+        }
 
         // 当取值的时候，应该让响应式属性和effect映射起来
         return Reflect.get(target,key,receiver)

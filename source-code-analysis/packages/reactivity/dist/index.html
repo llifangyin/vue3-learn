@@ -13,31 +13,46 @@
             name: 'lisi',
             age: 18,
             test:'test',
+            address:{n:1},
             flag:true
         }
         const state1 = reactive(obj)
         //   state1被代理过 一定有get set方法
         // console.log(state1 == state2, 'state')
         // console.log(state1.name, 'state1.name')
-        effect(() => {
-            app.innerHTML = state1.flag ? `name ${state1.name} test ${state1.test}`:` age ${state1.age}`
-            // flag true
-            // {obj:{flag:{effect},name:{effect}}}
-            // flag false 不需要name的effect了
-            // {obj:{flag:{effect},age:{effect}}}
-            // app.innerHTML = state1.flag + state1.flag + state1.flag
-        })
+    //    let runner =  effect(() => {
+    //         app.innerHTML = state1.flag ? `name ${state1.name} test ${state1.test}`:` age ${state1.age}`
+    //         // flag true
+    //         // {obj:{flag:{effect},name:{effect}}}
+    //         // flag false 不需要name的effect了
+    //         // {obj:{flag:{effect},age:{effect}}}
+    //         // app.innerHTML = state1.flag + state1.flag + state1.flag
+    //     },{
+    //         scheduler:()=>{
+    //             // 目的不自己更新，数据变化后自己处理如何渲染
+    //             // 数据更新了 走自己的逻辑
+    //             console.log('数据更新了 走自己的逻辑 scheduler',runner.effect)
+    //             runner()
+    //         }
+    //     })
         // effect(() => {
         //     app.innerHTML = `name ${state1.name} `
         // })
+        effect(()=>{
+            app.innerHTML = state1.address.n
+            // state1.name = Math.random()//effect正在执行，先不触发
+        })
         setTimeout(() => {
-            // state1.age++
-            state1.flag = false
-            // setTimeout(() => {
-            //     state1.name = 'wangwu' 
-            //     // 修改后不应该触发effect 因为没有使用
-            // }, 1000);
-        }, 1000)
+            state1.address.n++
+        }, 1000);
+        // setTimeout(() => {
+        //     state1.flag = false
+        //     state1.age++
+        //     // setTimeout(() => {
+        //     //     state1.name = 'wangwu' 
+        //     //     // 修改后不应该触发effect 因为没有使用
+        //     // }, 1000);
+        // }, 1000)
 
         // 需要一个算法，对比不同分支切换的差异
         // {flag,name}  {flag,age}

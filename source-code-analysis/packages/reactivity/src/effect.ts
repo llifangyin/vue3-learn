@@ -5,8 +5,13 @@ export function effect (fn,option?) {
         _effect.run()
     })
     _effect.run() // 默认先执行一次
-
-    return _effect
+    if(option){
+        Object.assign(_effect,option) //覆盖scheduler 不使用()=>{_effect.run() })
+    }
+    const runner = _effect.run.bind(_effect)
+    runner.effect = _effect
+    return runner //外界可以自己让其重新run
+    // return _effect
 }
 export let activeEffect ;
 function preCleanEffect(effect){
@@ -32,7 +37,7 @@ class ReactiveEffect{
     active = true; // 创建的effect是否处于激活状态
     deps = [] // 存放effect中用到的属性
     _depsLength = 0
-
+    _running = 0 // 是否正在执行 防止嵌套
     // 如果fn中依赖的数据发生变化后，需要重新调用scheduler => _effect.run
     constructor(public fn,public scheduler?){ }
     // fn就是用户传入的函数
@@ -48,11 +53,13 @@ class ReactiveEffect{
             activeEffect = this
             // effect重新执行前，将上一次的依赖清空
             preCleanEffect(this) // 每一次调用effect的fun时，
+            this._running++
             // 将effect的_trackId++
             // 保证同一个effect执行，id相同
             return this.fn() // track -> trackEffect(重新收集依赖)
         }
         finally{
+            this._running--
             postCleanEffect(this)
             activeEffect = lastEffect //防止嵌套，保证收集的是当前的effect
         }
@@ -98,7 +105,7 @@ export function trackEffect(effect,dep){
         }else{
             effect._depsLength++
         }
-        console.log(effect,111)
+        // console.log(effect,111)
         // console.log(targetMap,'targetMap')
     }
 
@@ -113,7 +120,10 @@ export function triggerEffect(dep){
         // console.log(effect,'effect')    
         // cleanUp name是dep.xxx赋值的，for of遍历不到
         if(effect.scheduler){
-            effect.scheduler() // => effect.run
+            if(!effect._running ){
+                // 如果正在执行，不调用scheduler
+                effect.scheduler() // => effect.run
+            }
         }
     }
 }

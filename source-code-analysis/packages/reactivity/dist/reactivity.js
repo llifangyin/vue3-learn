@@ -9,7 +9,12 @@ function effect(fn, option) {
     _effect.run();
   });
   _effect.run();
-  return _effect;
+  if (option) {
+    Object.assign(_effect, option);
+  }
+  const runner = _effect.run.bind(_effect);
+  runner.effect = _effect;
+  return runner;
 }
 var activeEffect;
 function preCleanEffect(effect2) {
@@ -25,6 +30,7 @@ function postCleanEffect(effect2) {
   }
 }
 var ReactiveEffect = class {
+  // 是否正在执行 防止嵌套
   // 如果fn中依赖的数据发生变化后，需要重新调用scheduler => _effect.run
   constructor(fn, scheduler) {
     this.fn = fn;
@@ -36,6 +42,7 @@ var ReactiveEffect = class {
     this.deps = [];
     // 存放effect中用到的属性
     this._depsLength = 0;
+    this._running = 0;
   }
   // fn就是用户传入的函数
   // scheduler 用来调度执行
@@ -47,8 +54,10 @@ var ReactiveEffect = class {
     try {
       activeEffect = this;
       preCleanEffect(this);
+      this._running++;
       return this.fn();
     } finally {
+      this._running--;
       postCleanEffect(this);
       activeEffect = lastEffect;
     }
@@ -72,13 +81,14 @@ function trackEffect(effect2, dep) {
     } else {
       effect2._depsLength++;
     }
-    console.log(effect2, 111);
   }
 }
 function triggerEffect(dep) {
   for (const effect2 of dep.keys()) {
     if (effect2.scheduler) {
-      effect2.scheduler();
+      if (!effect2._running) {
+        effect2.scheduler();
+      }
     }
   }
 }
@@ -131,6 +141,10 @@ var mutableHandlers = {
       return true;
     }
     track(target, key);
+    let res = Reflect.get(target, key, receiver);
+    if (isObject(res)) {
+      return reactive(res);
+    }
     return Reflect.get(target, key, receiver);
   },
   set(target, key, value, receiver) {
