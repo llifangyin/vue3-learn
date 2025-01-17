@@ -81,6 +81,7 @@ function trackEffect(effect2, dep) {
     } else {
       effect2._depsLength++;
     }
+    console.log(effect2, 111);
   }
 }
 function triggerEffect(dep) {
@@ -159,6 +160,9 @@ var mutableHandlers = {
 
 // packages/reactivity/src/reactive.ts
 var reactiveMap = /* @__PURE__ */ new WeakMap();
+function toReactive(value) {
+  return isObject(value) ? reactive(value) : value;
+}
 function reactive(target) {
   return createReactiveObject(target);
 }
@@ -176,10 +180,98 @@ function createReactiveObject(target) {
   reactiveMap.set(target, proxy);
   return proxy;
 }
+
+// packages/reactivity/src/ref.ts
+function ref(value) {
+  return createRef(value);
+}
+function createRef(value) {
+  return new RefImpl(value);
+}
+var RefImpl = class {
+  //收集对应的effect
+  constructor(_rawValue) {
+    this._rawValue = _rawValue;
+    this.__v_isRef = true;
+    this._value = toReactive(_rawValue);
+  }
+  get value() {
+    trackRefValue(this);
+    return this._value;
+  }
+  set value(newValue) {
+    if (newValue !== this._rawValue) {
+      this._rawValue = newValue;
+      this._value = newValue;
+      triggerRefValue(this);
+    }
+  }
+};
+function trackRefValue(ref2) {
+  if (activeEffect) {
+    trackEffect(
+      activeEffect,
+      ref2.dep = createDep(() => ref2.dep = void 0, "undefined")
+    );
+  }
+}
+function triggerRefValue(ref2) {
+  let dep = ref2.dep;
+  if (dep) {
+    triggerEffect(dep);
+  }
+}
+var ObjectRefImpl = class {
+  constructor(_object, _key) {
+    this._object = _object;
+    this._key = _key;
+    this.__v_isRef = true;
+  }
+  get value() {
+    return this._object[this._key];
+  }
+  set value(newValue) {
+    this._object[this._key] = newValue;
+  }
+};
+function toRef(object, key) {
+  return new ObjectRefImpl(object, key);
+}
+function toRefs(object) {
+  const ret = Array.isArray(object) ? new Array(object.length) : {};
+  for (const key in object) {
+    ret[key] = toRef(object, key);
+  }
+  return ret;
+}
+function proxyRefs(objectWidthRef) {
+  return new Proxy(objectWidthRef, {
+    get(target, key, reveiver) {
+      let r = Reflect.get(target, key, reveiver);
+      return r.__v_isRef ? r.value : r;
+    },
+    set(target, key, value, reveiver) {
+      const oldvalue = target[key];
+      if (oldvalue !== value) {
+        if (oldvalue.__v_isRef) {
+          oldvalue.value = value;
+          return true;
+        } else {
+          return Reflect.set(target, key, value, reveiver);
+        }
+      }
+    }
+  });
+}
 export {
   activeEffect,
   effect,
+  proxyRefs,
   reactive,
+  ref,
+  toReactive,
+  toRef,
+  toRefs,
   trackEffect,
   triggerEffect
 };

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>vue3源码解析</title>
 </head>
 <body>
     <div id="app"></div>
     <script type="module">
-        import { reactive ,effect} from './reactivity.js'
+        import { reactive ,effect, ref,toRef,toRefs,proxyRefs} from './reactivity.js'
         let obj = {
             name: 'lisi',
             age: 18,
@@ -16,17 +16,53 @@
             address:{n:1},
             flag:true
         }
-        const state1 = reactive(obj)
-        //   state1被代理过 一定有get set方法
-        // console.log(state1 == state2, 'state')
-        // console.log(state1.name, 'state1.name')
+        const state = reactive(obj)
+        // let name = .toRefs(state,'name')
+        // let age = toRef(state,'age')
+        // console.log(name,age,'name,age');
+        
+        // const {name,age} = toRefs(state)
+        // console.log(name,age,'name,age');
+        let proxyRefsObj = proxyRefs({...toRefs(state)})
+        proxyRefsObj.name = 'wangwu'
+        effect(() => {
+            // app.innerHTML = `name ${name.value} age ${age.value}`
+            console.log(proxyRefsObj.name,proxyRefsObj.age,'proxyRefs');
+            
+        })
+        // const flag = ref({name:'lisi'})
+    
+        // effect(()=>{
+        //     app.innerHTML = flag.value.name
+        // })
+        // setTimeout(() => {
+        //     flag.value.name = 'wangwu'
+        //     console.log(flag, 'flag')
+        // }, 1000);
+
+        // const flag = ref(true)
+        // const firstName = ref('zhang')
+        // const lastName = ref('wangwu')
+        // effect(()=>{
+        //     app.innerHTML = flag.value ? firstName.value + lastName.value:firstName.value + lastName.value + ':'
+        // })
+        // setTimeout(() => {
+        //     flag.value = false
+        //     console.log(flag, 'flag')
+        // }, 1000);
+
+
+        // const state = reactive(obj)
+        //   state被代理过 一定有get set方法
+        // console.log(state == state2, 'state')
+        // console.log(state.name, 'state.name')
     //    let runner =  effect(() => {
-    //         app.innerHTML = state1.flag ? `name ${state1.name} test ${state1.test}`:` age ${state1.age}`
+    //         app.innerHTML = state.flag ? `name ${state.name} test ${state.test}`:` age ${state.age}`
     //         // flag true
     //         // {obj:{flag:{effect},name:{effect}}}
     //         // flag false 不需要name的effect了
     //         // {obj:{flag:{effect},age:{effect}}}
-    //         // app.innerHTML = state1.flag + state1.flag + state1.flag
+    //         // app.innerHTML = state.flag + state.flag + state.flag
     //     },{
     //         scheduler:()=>{
     //             // 目的不自己更新，数据变化后自己处理如何渲染
@@ -35,21 +71,22 @@
     //             runner()
     //         }
     //     })
+
         // effect(() => {
-        //     app.innerHTML = `name ${state1.name} `
+        //     app.innerHTML = `name ${state.name} `
         // })
-        effect(()=>{
-            app.innerHTML = state1.address.n
-            // state1.name = Math.random()//effect正在执行，先不触发
-        })
-        setTimeout(() => {
-            state1.address.n++
-        }, 1000);
+        // effect(()=>{
+        //     app.innerHTML = state.address.n
+        //     // state.name = Math.random()//effect正在执行，先不触发
+        // })
         // setTimeout(() => {
-        //     state1.flag = false
-        //     state1.age++
+        //     state.address.n++
+        // }, 1000);
+        // setTimeout(() => {
+        //     state.flag = false
+        //     state.age++
         //     // setTimeout(() => {
-        //     //     state1.name = 'wangwu' 
+        //     //     state.name = 'wangwu' 
         //     //     // 修改后不应该触发effect 因为没有使用
         //     // }, 1000);
         // }, 1000)
@@ -58,11 +95,11 @@
         // {flag,name}  {flag,age}
 
         // effect(() => {
-        //     console.log(state1.name, 'state1.name')
+        //     console.log(state.name, 'state.name')
         //     effect(() => {
-        //         console.log(state1.name, 'state1.name')
+        //         console.log(state.name, 'state.name')
         //     })
-        //     console.log(state1.age, 'state1.name')
+        //     console.log(state.age, 'state.name')
         // })
         // _effect.run()
     </script>

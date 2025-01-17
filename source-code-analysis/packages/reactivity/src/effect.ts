@@ -105,8 +105,8 @@ export function trackEffect(effect,dep){
         }else{
             effect._depsLength++
         }
-        // console.log(effect,111)
-        // console.log(targetMap,'targetMap')
+        console.log(effect,111)
+        // console.log(targetMap,'targetMap')//obj对象时
     }
 
 }
