@@ -1,3 +1,4 @@
+import { DirtyLevels } from './constant'
 import { targetMap } from './reactiveEffect'
 export function effect (fn,option?) {
 // 创建一个响应式effect，数据变化后重新执行
@@ -32,17 +33,26 @@ function postCleanEffect(effect){
     }
 }
 // effectScope.stop() // 停止依赖收集 不参加响应式处理
-class ReactiveEffect{
+export class ReactiveEffect{
     _trackId= 0;//记录effect执行的次数
     active = true; // 创建的effect是否处于激活状态
     deps = [] // 存放effect中用到的属性
     _depsLength = 0
     _running = 0 // 是否正在执行 防止嵌套
+    _dirtyLevel = DirtyLevels.Dirty // 默认是脏值
     // 如果fn中依赖的数据发生变化后，需要重新调用scheduler => _effect.run
     constructor(public fn,public scheduler?){ }
+    public get dirty(){
+        return this._dirtyLevel == DirtyLevels.Dirty
+    }
+    public set dirty(val){
+        this._dirtyLevel = val?DirtyLevels.Dirty:DirtyLevels.NoDirty
+    }
     // fn就是用户传入的函数
     // scheduler 用来调度执行
     run(){
+        // 每次运行后,将脏值设置为NoDirty
+        this._dirtyLevel = DirtyLevels.NoDirty
         // 让fn执行
         if(!this.active){
             return this.fn()
@@ -105,7 +115,7 @@ export function trackEffect(effect,dep){
         }else{
             effect._depsLength++
         }
-        console.log(effect,111)
+        // console.log(effect,111)
         // console.log(targetMap,'targetMap')//obj对象时
     }
 
@@ -119,6 +129,11 @@ export function triggerEffect(dep){
         // 触发更新
         // console.log(effect,'effect')    
         // cleanUp name是dep.xxx赋值的，for of遍历不到
+        if(effect._dirtyLevel < DirtyLevels.Dirty){
+            // 如果是脏值，重新执行
+            effect._dirtyLevel = DirtyLevels.Dirty
+        }
+
         if(effect.scheduler){
             if(!effect._running ){
                 // 如果正在执行，不调用scheduler

@@ -1,10 +1,8 @@
 import { isObject } from "@vue/shared"
 import { track,trigger } from "./reactiveEffect"
 import { reactive } from "./reactive"
+import { ReactiveFlags } from "./constant"
 
-export enum ReactiveFlags{
-    IS_REACTIVE = '__v_isReactive',// 标识是否是响应式对象
-}
 //  proxy 搭配reflect使用, 
 // Reflect是一个内置对象，它提供拦截 JavaScript 操作的方法。
 

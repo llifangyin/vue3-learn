@@ -8,7 +8,7 @@
 <body>
     <div id="app"></div>
     <script type="module">
-        import { reactive ,effect, ref,toRef,toRefs,proxyRefs} from './reactivity.js'
+        import { reactive ,effect, ref,toRef,toRefs,proxyRefs,computed} from './reactivity.js'
         let obj = {
             name: 'lisi',
             age: 18,
@@ -17,19 +17,48 @@
             flag:true
         }
         const state = reactive(obj)
+
+        const aliasName = computed({
+            // console.log('runner')
+            // return state.name + '==='
+            get(oldValue){
+                console.log('runner',oldValue)
+                return state.name + '==='
+            },
+            set(v){
+                console.log(v,'v')
+            }
+        })
+        // computed 
+        // 1.计算属性具备收集能力，可以收集对应的effect,依赖的值变化后，重新执行effect
+        // 2. 计算属性维护了一个dirty属性，默认true,运行一次后变为false,并且稍后依赖的值的变化再次变为true
+        // 3. 计算属性也是个effect,依赖的属性会收集这个计算属性,值变化后,会让computedEffect里的dirty变为true
+
+
+        // 多次访问 只会执行一次
+        console.log(aliasName.value,'aliasName1')
+        console.log(aliasName.value,'aliasName2')
+        setTimeout(() => {
+            state.name = 'wangwu'
+            console.log(aliasName.value,'aliasName3')
+        }, 1000);
+
+
+
+        // const state = reactive(obj)
         // let name = .toRefs(state,'name')
         // let age = toRef(state,'age')
         // console.log(name,age,'name,age');
         
         // const {name,age} = toRefs(state)
         // console.log(name,age,'name,age');
-        let proxyRefsObj = proxyRefs({...toRefs(state)})
-        proxyRefsObj.name = 'wangwu'
-        effect(() => {
-            // app.innerHTML = `name ${name.value} age ${age.value}`
-            console.log(proxyRefsObj.name,proxyRefsObj.age,'proxyRefs');
+        // let proxyRefsObj = proxyRefs({...toRefs(state)})
+        // proxyRefsObj.name = 'wangwu'
+        // effect(() => {
+        //     // app.innerHTML = `name ${name.value} age ${age.value}`
+        //     console.log(proxyRefsObj.name,proxyRefsObj.age,'proxyRefs');
             
-        })
+        // })
         // const flag = ref({name:'lisi'})
     
         // effect(()=>{
