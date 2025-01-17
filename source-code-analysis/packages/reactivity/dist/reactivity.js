@@ -72,6 +72,7 @@ function trackEffect(effect2, dep) {
     } else {
       effect2._depsLength++;
     }
+    console.log(effect2, 111);
   }
 }
 function triggerEffect(dep) {

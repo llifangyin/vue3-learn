@@ -93,11 +93,12 @@ export function trackEffect(effect,dep){
             // {flag,name}
             // {flag,age}
             // effect.deps -> 永远按照最新的收集顺序存放
+            
             effect.deps[effect._depsLength++] = dep
         }else{
             effect._depsLength++
         }
-        // console.log(effect,111)
+        console.log(effect,111)
         // console.log(targetMap,'targetMap')
     }
 
