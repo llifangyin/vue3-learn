@@ -66,12 +66,15 @@ export class ReactiveEffect{
             this._running++
             // 将effect的_trackId++
             // 保证同一个effect执行，id相同
+            console.log(activeEffect,'activeEffect in  run');
+            
             return this.fn() // track -> trackEffect(重新收集依赖)
         }
         finally{
             this._running--
             postCleanEffect(this)
             activeEffect = lastEffect //防止嵌套，保证收集的是当前的effect
+
         }
     }
 }

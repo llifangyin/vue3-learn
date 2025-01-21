@@ -67,6 +67,7 @@ var ReactiveEffect = class {
       activeEffect = this;
       preCleanEffect(this);
       this._running++;
+      console.log(activeEffect, "activeEffect in  run");
       return this.fn();
     } finally {
       this._running--;
@@ -222,6 +223,7 @@ var RefImpl = class {
   }
 };
 function trackRefValue(ref2) {
+  console.log(activeEffect, "\u6536\u96C6\u4F9D\u8D56 trackRefValue");
   if (activeEffect) {
     trackEffect(
       activeEffect,
@@ -293,9 +295,9 @@ var ComputedRefImpl = class {
   get value() {
     if (this.effect.dirty) {
       this._value = this.effect.run();
-      return this._value;
+      trackRefValue(this);
+      console.log(activeEffect, "activeEffect ==");
     }
-    trackRefValue(this);
     return this._value;
   }
   set value(v) {
@@ -314,7 +316,6 @@ function computed(getterOroptions) {
     getter = getterOroptions.get;
     setter = getterOroptions.set;
   }
-  console.log(getter, setter);
   return new ComputedRefImpl(getter, setter);
 }
 export {

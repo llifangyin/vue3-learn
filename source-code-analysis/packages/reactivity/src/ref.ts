@@ -1,4 +1,4 @@
-import { activeEffect, trackEffect,triggerEffect } from './effect';
+ import { activeEffect, trackEffect,triggerEffect } from './effect';
 import { toReactive } from './reactive'
 import { createDep } from './reactiveEffect'
 export function ref(value){
@@ -30,6 +30,8 @@ class RefImpl{
     }
 }
 export function trackRefValue(ref){
+    console.log(activeEffect,'收集依赖 trackRefValue');
+    
     if(activeEffect){
        trackEffect(activeEffect,
         ref.dep = createDep(() => ref.dep = undefined ,'undefined')

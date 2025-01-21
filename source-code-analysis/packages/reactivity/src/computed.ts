@@ -1,5 +1,5 @@
 import { isFunction } from '@vue/shared'
-import { ReactiveEffect, effect } from './effect';
+import { ReactiveEffect, effect ,activeEffect} from './effect';
 import { trackRefValue, triggerRefValue } from './ref';
 
 class ComputedRefImpl{
@@ -8,7 +8,7 @@ class ComputedRefImpl{
     public dep;
     constructor( getter,public setter){
         // 创建一个effect 管理当前的dirty属性
-        this. effect = new ReactiveEffect(
+        this.effect = new ReactiveEffect(
             ()=>getter(this._value),//fn
             ()=>{ //scheduler
                 // 计算依赖属性的值变化了,触发渲染
@@ -21,10 +21,12 @@ class ComputedRefImpl{
         // 需要额外处理 每次取值不用都run
         if(this.effect.dirty){
             this._value = this.effect.run()
-            return this._value
+            // 如果当前在eff ect中访问了属性,这个计算属性收集effct
+            trackRefValue(this)
+            console.log(activeEffect,'activeEffect ==');
+            
+            //  this  => ComputedRefImpl {effect,get,_value,value,dep}
         }
-        // 如果当前在effect中访问了属性,这个计算属性收集effct
-        trackRefValue(this)
         return this._value //fn -> getter(_value)
     }
     set value(v){ 
@@ -42,6 +44,6 @@ export function computed(getterOroptions) {
         getter = getterOroptions.get
         setter = getterOroptions.set
     }
-    console.log(getter, setter)
+    // console.log(getter, setter)
     return new ComputedRefImpl(getter, setter)
 }

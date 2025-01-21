@@ -22,7 +22,7 @@
             // console.log('runner')
             // return state.name + '==='
             get(oldValue){
-                console.log('runner',oldValue)
+                // console.log('runner',oldValue)
                 return state.name + '==='
             },
             set(v){
@@ -36,7 +36,7 @@
 
 
         // 多次访问 只会执行一次
-        console.log(aliasName.value,'aliasName1')
+        // console.log(aliasName.value,'aliasName1')
         console.log(aliasName.value,'aliasName2')
         setTimeout(() => {
             state.name = 'wangwu'
