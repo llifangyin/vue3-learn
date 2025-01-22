@@ -30,9 +30,9 @@ class RefImpl{
     }
 }
 export function trackRefValue(ref){
-    console.log(activeEffect,'收集依赖 trackRefValue');
-    
+
     if(activeEffect){
+        console.log(activeEffect,'收集依赖 trackRefValue');
        trackEffect(activeEffect,
         ref.dep = createDep(() => ref.dep = undefined ,'undefined')
        )
@@ -87,4 +87,7 @@ export function proxyRefs(objectWidthRef){
            }
         }
     })
+}
+export function isRef(value){
+    return value ? value.__v_isRef === true:false
 }

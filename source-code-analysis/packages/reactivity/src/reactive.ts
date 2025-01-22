@@ -40,3 +40,7 @@ function createReactiveObject(target){
 // Map的键keys是强引用的，当键所引用的对象在其他地方不在被引用时，垃圾回收机制不会自动回收这些对象
 // WeakMap的keys只能为对象 ，Map可以使用任意类型的键
 // WeakMap适用于缓存机制，
+
+export function isReactive(value){
+    return !!(value && value[ReactiveFlags.IS_REACTIVE])
+}

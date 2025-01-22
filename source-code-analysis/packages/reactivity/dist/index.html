@@ -8,7 +8,7 @@
 <body>
     <div id="app"></div>
     <script type="module">
-        import { reactive ,effect, ref,toRef,toRefs,proxyRefs,computed} from './reactivity.js'
+        import { reactive ,effect, ref,toRef,toRefs,proxyRefs,computed,watch,watchEffect} from './reactivity.js'
         let obj = {
             name: 'lisi',
             age: 18,
@@ -16,19 +16,44 @@
             address:{n:1},
             flag:true
         }
-        const state = reactive(obj)
+        const state = ref(obj)
 
-        const aliasName = computed({
-            // console.log('runner')
-            // return state.name + '==='
-            get(oldValue){
-                // console.log('runner',oldValue)
-                return state.name + '==='
-            },
-            set(v){
-                console.log(v,'v')
-            }
+        // watch(state.value,
+        //     function(newValue,oldValue){
+        //         console.log(newValue,oldValue,'watch')
+        //     },
+        //     {
+        //         deep:true,
+        //         immediate:true
+        //     }
+        // )
+
+        // setTimeout(() => {
+        //     state.value.name= 'wangwu'
+        // }, 1000);
+
+        const state2 = reactive({name:'zhaoliu',age:20})
+
+        watchEffect(()=>{
+            console.log(state2.name + state.value.age,'watchEffect')
         })
+        setTimeout(() => {
+            state2.name = 'wangwu'
+            state.value.age = 30
+        }, 1000);
+
+
+        // const aliasName = computed({
+        //     // console.log('runner')
+        //     // return state.name + '==='
+        //     get(oldValue){
+        //         // console.log('runner',oldValue)
+        //         return state.name + '==='
+        //     },
+        //     set(v){
+        //         console.log(v,'v')
+        //     }
+        // })
         // computed 
         // 1.计算属性具备收集能力，可以收集对应的effect,依赖的值变化后，重新执行effect
         // 2. 计算属性维护了一个dirty属性，默认true,运行一次后变为false,并且稍后依赖的值的变化再次变为true
@@ -37,11 +62,11 @@
 
         // 多次访问 只会执行一次
         // console.log(aliasName.value,'aliasName1')
-        console.log(aliasName.value,'aliasName2')
-        setTimeout(() => {
-            state.name = 'wangwu'
-            console.log(aliasName.value,'aliasName3')
-        }, 1000);
+        // console.log(aliasName.value,'aliasName2')
+        // setTimeout(() => {
+        //     state.name = 'wangwu'
+        //     console.log(aliasName,'aliasName3')
+        // }, 1000);
 
 
 

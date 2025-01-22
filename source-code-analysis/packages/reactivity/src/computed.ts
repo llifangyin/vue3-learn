@@ -12,7 +12,7 @@ class ComputedRefImpl{
             ()=>getter(this._value),//fn
             ()=>{ //scheduler
                 // 计算依赖属性的值变化了,触发渲染
-                triggerRefValue(this) 
+                triggerRefValue(this)  // TOOD
                 // 将dirty变为true
             }
         )
@@ -23,7 +23,7 @@ class ComputedRefImpl{
             this._value = this.effect.run()
             // 如果当前在eff ect中访问了属性,这个计算属性收集effct
             trackRefValue(this)
-            console.log(activeEffect,'activeEffect ==');
+            // console.log(activeEffect,'activeEffect ==');
             
             //  this  => ComputedRefImpl {effect,get,_value,value,dep}
         }
