@@ -32,15 +32,16 @@
         //     state.value.name= 'wangwu'
         // }, 1000);
 
-        const state2 = reactive({name:'zhaoliu',age:20})
+    //     const state2 = reactive({name:'zhaoliu',age:20})
 
-        watchEffect(()=>{
-            console.log(state2.name + state.value.age,'watchEffect')
-        })
-        setTimeout(() => {
-            state2.name = 'wangwu'
-            state.value.age = 30
-        }, 1000);
+    //    const unwatch =  watchEffect(()=>{
+    //         console.log(state2.name + state.value.age,'watchEffect')
+    //     })
+    //     unwatch()
+    //     setTimeout(() => {
+    //         state2.name = 'wangwu'
+    //         state.value.age = 30
+    //     }, 1000);
 
 
         // const aliasName = computed({

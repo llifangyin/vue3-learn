@@ -77,6 +77,14 @@ export class ReactiveEffect{
 
         }
     }
+    stop(){
+        if(this.active){
+            // 如果effect处于激活状态，停止依赖收集
+            this.active = false
+            preCleanEffect(this)
+            postCleanEffect(this)
+        }
+    }
 }
 
 function cleanDepEffect(dep,effect){

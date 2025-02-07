@@ -1,5 +1,5 @@
 import { isFunction, isObject } from "@vue/shared"
-import { ReactiveEffect } from "./effect"
+import { effect, ReactiveEffect } from "./effect"
 import { isReactive } from "./reactive"
 import { isRef } from "./ref"
 import { watchEffect } from 'vue';
@@ -55,10 +55,24 @@ function doWatch(source,cb,{deep,immediate}){
     }
     
     let oldValue ;
+
+    let clean;
+    const onCleanUp = (fn) => {
+        // 清除副作用
+        clean = () => {
+            fn()
+            clean = undefined
+        }
+    }
+
     const job = () => {
         if(cb){
             const newValue =   effect.run()
-            cb(newValue,oldValue)
+            if(clean){
+                clean() // 执行回调前 先调用上一次的清理操作
+            }
+
+            cb(newValue,oldValue,onCleanUp)
             oldValue = newValue
         }else{
             effect.run()
@@ -76,5 +90,10 @@ function doWatch(source,cb,{deep,immediate}){
         // watchEffect
         effect.run()
     }
+    const unwatch = () => {
+        effect.stop()   
+    }
+    return unwatch
 }
+
 

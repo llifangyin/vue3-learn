@@ -34,7 +34,7 @@ export function trackRefValue(ref){
     if(activeEffect){
         console.log(activeEffect,'收集依赖 trackRefValue');
        trackEffect(activeEffect,
-        ref.dep = createDep(() => ref.dep = undefined ,'undefined')
+        ref.dep = ref.dep || createDep(() => ref.dep = undefined ,'undefined')
        )
     }
 }
