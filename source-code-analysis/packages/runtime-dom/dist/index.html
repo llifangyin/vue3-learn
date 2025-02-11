@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vue3源码解析</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script type="module">
+        import { 
+            h,
+            createRenderer,
+            render
+        } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+        import {
+          renderOptions
+         } from './runtime-dom.js'
+    //   1. createRenderer自己创建渲染器 ， 让我们自己提供渲染方式
+    //   2. render 用内置的渲染器来进行渲染，渲染dom元素
+    //   3. h 创建虚拟dom
+        // runtimedom 的作用是提供dom api操作 
+        // runtimedom 针对浏览器
+        // @vue/runtime-core => @vue/reactivity(响应式渲染)
+         console.log(renderOptions,'renderOptions');
+         
+        let ele = h('h1',{
+            style:{color:'red'},
+            class:'test',
+            onClick:()=>{console.log('click')},
+            a:'12'
+        },'hello')
+        // console.log(ele,'ele')
+        const renderer =  createRenderer(
+            renderOptions,
+            //     {
+            //     createElement(type){
+            //         return document.createElement('h1')
+            //     },
+            //     setElementText(el,text){
+            //         el.textContent = text
+            //     },
+            //     insert(el,container){
+            //         container.append(el)
+            //     }
+            // }
+        )
+        renderer.render(ele,app)
+    </script>
+</body>
+</html>
