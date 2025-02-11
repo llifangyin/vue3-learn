@@ -11,10 +11,11 @@
         import { 
             h,
             createRenderer,
-            render
+            // render
         } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
         import {
-          renderOptions
+        //   renderOptions
+            render
          } from './runtime-dom.js'
     //   1. createRenderer自己创建渲染器 ， 让我们自己提供渲染方式
     //   2. render 用内置的渲染器来进行渲染，渲染dom元素
@@ -22,17 +23,17 @@
         // runtimedom 的作用是提供dom api操作 
         // runtimedom 针对浏览器
         // @vue/runtime-core => @vue/reactivity(响应式渲染)
-         console.log(renderOptions,'renderOptions');
+        //  console.log(renderOptions,'renderOptions');
          
         let ele = h('h1',{
             style:{color:'red'},
             class:'test',
             onClick:()=>{console.log('click')},
             a:'12'
-        },'hello')
+        },[h('span',null,'hello'),h('span',null,'world')])
         // console.log(ele,'ele')
-        const renderer =  createRenderer(
-            renderOptions,
+        // const renderer =  createRenderer(
+        //     renderOptions,
             //     {
             //     createElement(type){
             //         return document.createElement('h1')
@@ -44,8 +45,13 @@
             //         container.append(el)
             //     }
             // }
-        )
-        renderer.render(ele,app)
+        // )
+        const el2 = h('h2',null,'world')
+        render(ele,app)
+        setTimeout(() => {
+            render(el2,app)
+        }, 3000);
+        // renderer.render(ele,app)
     </script>
 </body>
 </html>
