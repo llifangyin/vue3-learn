@@ -8,8 +8,10 @@ export  default function patchStyle(el, preValue, nextValue) {
         }
         if (preValue) {
             for (const key in preValue) {
-                if (!nextValue[key]) {
-                    style[key] = ''
+                if(nextValue){
+                    if (!nextValue[key]) {
+                        style[key] = ''
+                    }
                 }
             }
         }

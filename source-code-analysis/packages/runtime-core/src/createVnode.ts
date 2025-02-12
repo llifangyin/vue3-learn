@@ -24,3 +24,6 @@ export function createVNode(type, props, children?) {
     }
     return vnode
 }
+export function isSameVnode(n1,n2){
+    return n1.key === n2.key && n1.type === n2.type
+}
