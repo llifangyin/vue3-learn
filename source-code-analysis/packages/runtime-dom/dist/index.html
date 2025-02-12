@@ -7,14 +7,16 @@
 </head>
 <body>
     <div id="app"></div>
+    <div id="test"></div>
     <script type="module">
         import { 
-            h,
-            createRenderer,
+            // h,
+            // createRenderer,
             // render
         } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
         import {
         //   renderOptions
+            h,
             render
          } from './runtime-dom.js'
     //   1. createRenderer自己创建渲染器 ， 让我们自己提供渲染方式
@@ -25,12 +27,12 @@
         // @vue/runtime-core => @vue/reactivity(响应式渲染)
         //  console.log(renderOptions,'renderOptions');
          
-        let ele = h('h1',{
-            style:{color:'red'},
-            class:'test',
-            onClick:()=>{console.log('click')},
-            a:'12'
-        },[h('span',null,'hello'),h('span',null,'world')])
+        // let ele = h('h1',{
+        //     style:{color:'red'},
+        //     class:'test',
+        //     onClick:()=>{console.log('click')},
+        //     a:'12'
+        // },[h('span',null,'hello'),h('span',null,'world')])
         // console.log(ele,'ele')
         // const renderer =  createRenderer(
         //     renderOptions,
@@ -46,11 +48,19 @@
             //     }
             // }
         // )
-        const el2 = h('h2',null,'world')
-        render(ele,app)
-        setTimeout(() => {
-            render(el2,app)
-        }, 3000);
+        // 1. 两个参数 
+        const ele1= h('h2',{a:'1'})
+        const ele2= h('h2','hello') 
+        const ele3= h('h2',['hello','world'])
+        const ele4= h('h2',h('span','hello'))
+        const ele5= h('h2',{},'hello','world','vue') 
+
+        console.log(ele1,ele2,ele3,ele4,ele5)
+        render(ele5,app)
+        // render(ele1,app)
+        // setTimeout(() => {
+        //     render(el2,app)
+        // }, 3000);
         // renderer.render(ele,app)
     </script>
 </body>

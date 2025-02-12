@@ -106,7 +106,66 @@ function patchProp(el, key, preValue, nextValue) {
   }
 }
 
-// packages/runtime-core/src/index.ts
+// packages/shared/src/index.ts
+function isObject(value) {
+  return typeof value === "object" && value !== null;
+}
+function isString(value) {
+  return typeof value === "string";
+}
+
+// packages/runtime-core/src/createVnode.ts
+function isVnode(vnode) {
+  return vnode.__v_isVNode;
+}
+function createVNode(type, props, children) {
+  const shapeFlag = isString(type) ? 1 /* ELEMENT */ : 0;
+  const vnode = {
+    __v_isVNode: true,
+    type,
+    props,
+    children,
+    key: props?.key,
+    //for diff
+    el: null,
+    //真实节点
+    shapeFlag
+  };
+  if (children) {
+    if (Array.isArray(children)) {
+      vnode.shapeFlag |= 16 /* ARRAY_CHILDREN */;
+    } else {
+      children = String(children);
+      vnode.shapeFlag |= 8 /* TEXT_CHILDREN */;
+    }
+  }
+  return vnode;
+}
+
+// packages/runtime-core/src/h.ts
+function h(type, propsOrChildren, children) {
+  let l = arguments.length;
+  if (l === 2) {
+    if (isObject(propsOrChildren) && !Array.isArray(propsOrChildren)) {
+      if (isVnode(propsOrChildren)) {
+        return createVNode(type, null, [propsOrChildren]);
+      } else {
+        return createVNode(type, propsOrChildren);
+      }
+    }
+    return createVNode(type, null, propsOrChildren);
+  } else {
+    if (l > 3) {
+      children = Array.prototype.slice.call(arguments, 2);
+    }
+    if (l === 3 && isVnode(children)) {
+      children = [children];
+    }
+    return createVNode(type, propsOrChildren, children);
+  }
+}
+
+// packages/runtime-core/src/renderer.ts
 function createRenderer(renderOptions2) {
   const {
     insert: hostInsert,
@@ -126,10 +185,10 @@ function createRenderer(renderOptions2) {
   };
   const mountElement = (vnode, container) => {
     const { type, props, children, shapeFlag } = vnode;
-    const el = vnode.el = hostCreateElement(type);
+    const el = hostCreateElement(type);
     if (props) {
       for (const key in props) {
-        hostPatchProp(el, key, {}, props[key]);
+        hostPatchProp(el, key, null, props[key]);
       }
     }
     console.log(vnode, "vnode");
@@ -168,6 +227,9 @@ var render = (vnode, container) => {
 };
 export {
   createRenderer,
+  createVNode,
+  h,
+  isVnode,
   render
 };
 //# sourceMappingURL=runtime-dom.js.map
