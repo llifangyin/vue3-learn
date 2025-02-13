@@ -7,13 +7,12 @@
 </head>
 <body>
     <div id="app"></div>
-    <div id="test"></div>
     <script type="module">
-        import { 
+        // import { 
             // h,
             // createRenderer,
             // render
-        } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+        // } from './vue.esm-browser.js'
         import {
         //   renderOptions
             h,
@@ -54,14 +53,39 @@
         //  const ele3= h('h2',{style:{color:'red'}},'world')
         // const ele4= h('h2',{style:{color:'red'}},h('span','world'))
         // const ele5= h('h2',{},'hello','world','vue') 
-        const ele6 = h('h2',{style:{color:'#666'}},[h('span','hello'),h('span','world')]) 
-        const ele7 = h('h2',{a:'1'},[h('span','hello'),h('span','world')]) 
+        const ele6 = h('h1',
+        [
+            h('div',{key:'a'},'a'),
+            h('div',{key:'b'},'b'),
 
+            h('div',{key:'c'},'c'),
+            h('div',{key:'d'},'d'),
+            h('div',{key:'e'},'e'),
+            h('div',{key:'q'},'q'),
+
+            h('div',{key:'f'},'f'),
+            h('div',{key:'g'},'g')
+        ]
+       ) 
+        const ele7 = h('h1',
+        [
+            h('div',{key:'a'},'a'),
+            h('div',{key:'b'},'b'),
+
+            h('div',{key:'e'},'e'),
+            h('div',{key:'c'},'c'),
+            h('div',{key:'d',style:{color:'red'}},'d'),
+            h('div',{key:'h'},'h'),
+
+            h('div',{key:'f'},'f'),
+            h('div',{key:'g'},'g')
+        ]
+       ) 
         // console.log(ele1,ele2,ele3,ele4,ele5)
         render(ele6,app)
         // render(ele1,app)
         setTimeout(() => {
-            render(ele2,app)
+            render(ele7,app)
         }, 3000);
         // renderer.render(ele,app)
     </script>

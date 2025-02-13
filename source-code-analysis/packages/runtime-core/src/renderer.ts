@@ -18,7 +18,7 @@ export function createRenderer(renderOptions) {
             patch(null,children[i],container)
         }
     }
-    const mountElement = (vnode,container) => {
+    const mountElement = (vnode,container,anchor) => {
         const {type,props,children,shapeFlag} = vnode
         // ShapeFlags通过位运算判断节点类型
         // 第一次渲染时 虚拟节点和真实节点创建关联
@@ -38,13 +38,13 @@ export function createRenderer(renderOptions) {
             mountChildren(children,el)
         }
 
-        hostInsert(el,container)
+        hostInsert(el,container,anchor)
     }
     // 处理虚拟节点
-    const processElement = (n1,n2,container) => {
+    const processElement = (n1,n2,container,anchor) => {
         if(n1 == null){
             // 初始化
-            mountElement(n2,container)
+            mountElement(n2,container,anchor)
         }else{
             patchElement(n1,n2,container)
         }
@@ -62,6 +62,103 @@ export function createRenderer(renderOptions) {
                 hostPatchProp(el,key,oldProps[key],null)
             }
         }
+    }
+    const patchKeyedChildren = (c1,c2,el) => {
+        // 对比两个children差异
+
+        // 1.减少比对范围 从头开始比较， 从尾部比较，确定不一样的范围
+        // 2 从头比对，从未比对，如果有多余的或新增的，直接操作即可
+
+        let i = 0 //比对的索引
+        let e1 = c1.length - 1 //老的最后一项索引
+        let e2 = c2.length - 1 //新的最后一项索引
+
+        // [a,b,c] => [a,b,d,e]
+        // 从头开始比对
+        while(i <= e1 && i <= e2){
+            const n1 = c1[i]
+            const n2 = c2[i]
+            // 一个不一样就停止
+            if(isSameVnode(n1,n2)){
+                patch(n1,n2,el)// 递归比较 子节点 更新props等
+            }else{
+                break
+            }
+            i++
+        }
+        // a b c  => d e b c
+        while(i <= e1 && i <= e2){
+            const n1 = c1[e1]
+            const n2 = c2[e2]
+            if(isSameVnode(n1,n2)){
+                patch(n1,n2,el)
+            }else{
+                break
+            }
+            e1--
+            e2--
+        }
+        // a b  => a b c i = 2 e1 = 1 e2 = 2  i> e1  i<e2新增了
+        // a b => c a b i=0 e1 = -1 e2 = 0    i>e1i<=e2 新增了 往前插入
+        if(i>e1 ){
+            if(i<=e2){
+                // 说明新增了
+                const nextPos = e2 + 1
+                const anchor =  c2[nextPos]?.el
+                while(i<=e2){
+                    patch(null,c2[i],el,anchor)
+                    i++
+                }
+            }
+        }else if(i>e2){
+            // a b c => a b i = 2 e1 = 2 e2 = 1  i<=e1 i>e2 删除了
+            //  c a b  => a b  i = 0 e1 = 1 e2 = -1  i<=e1 i>e2 删除了
+            if(i<=e1){
+               while(i<=e1){
+                     unmount(c1[i])
+                     i++
+                }
+            }
+        }
+        // 特殊比对
+        // a b c d e q f g => a b   e c d h   f g
+
+        let s1 = i
+        let s2 = i
+        const keyToNewIndexMap = new Map()//映射表用于快速查找，老的是否在新的里面，没有删除，有更新
+        for(let i = s2;i<=e2;i++){
+            const nextChild = c2[i]
+            keyToNewIndexMap.set(nextChild.key,i)
+        }
+        // Map(4) {'e' => 2, 'c' => 3, 'd' => 4, 'h' => 5}  keyToNewIndexMap
+        // console.log(keyToNewIndexMap,'keyToNewIndexMap')
+        // 删除老的，复用旧的
+        for(let i = s1;i<=e1;i++){
+            const prevChild = c1[i]
+            const newIndex = keyToNewIndexMap.get(prevChild.key)
+            if(newIndex == undefined){
+                // 老的有新的没有
+                unmount(prevChild)
+            }else{
+                patch(prevChild,c2[newIndex],el)
+            }
+        }
+        // 调整顺序
+        // 按照新的队列倒序插入 新的元素多 创建  
+        let toBePatched = e2 - s2 + 1//倒序插入的数量
+        for(let i = toBePatched-1;i>=0;i--){
+            let newIndex = s2 + i//h对应的索引，找他的下一个元素 作为锚点
+            let anchor = c2[newIndex + 1]?.el 
+            // console.log(anchor,'anchor')
+            if(c2[newIndex].el){
+                // 列表中已存在的元素
+                hostInsert(c2[newIndex].el,el,anchor)
+            }else{
+                // 新元素
+                patch(null,c2[newIndex],el,anchor)
+            }
+        }
+
     }
     const unmountChildren = (children) => {
         for(let i = 0;i<children.length;i++){
@@ -85,13 +182,15 @@ export function createRenderer(renderOptions) {
             }
         }else{
             if(prevShapeFlag & ShapeFlags.ARRAY_CHILDREN){
+                
                 // 老的是数组 新的是数组
                if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
-                    // patchKeyedChildren(c1,c2,el)
+                    patchKeyedChildren(c1,c2,el)
                }else{
                     unmountChildren(c1)
                }
             }else{
+
                 if(prevShapeFlag & ShapeFlags.TEXT_CHILDREN){
                     // 老的是文本 
                     hostSetElementText(el,'')
@@ -114,18 +213,18 @@ export function createRenderer(renderOptions) {
         patchProps(el,oldProps,newProps)
         patchChildren(n1,n2,el)
     }
-    const patch = (n1,n2,container) => {
+    const patch = (n1,n2,container, anchor= null) => {
         // 处理虚拟节点
         if(n1 == n2){
             return
         }
         // 同一个节点
-        if(n1 && isSameVnode(n1,n2)){
+        if(n1 && !isSameVnode(n1,n2)){
             unmount(n1)
             n1 = null
         }
         // n1.shapeFlag区分
-        processElement(n1,n2,container)
+        processElement(n1,n2,container,anchor)
         
 
     }
@@ -141,7 +240,6 @@ export function createRenderer(renderOptions) {
                unmount(container._vnode)
             }
         }
-
         // 将虚拟节点变成真实节点渲染
         patch( container._vnode ||null,vnode,container)
 
