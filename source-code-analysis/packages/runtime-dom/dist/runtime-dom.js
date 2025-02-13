@@ -267,6 +267,8 @@ function createRenderer(renderOptions2) {
     let s1 = i;
     let s2 = i;
     const keyToNewIndexMap = /* @__PURE__ */ new Map();
+    let toBePatched = e2 - s2 + 1;
+    let newIndexToOldMapIndex = new Array(toBePatched).fill(0);
     for (let i2 = s2; i2 <= e2; i2++) {
       const nextChild = c2[i2];
       keyToNewIndexMap.set(nextChild.key, i2);
@@ -277,11 +279,13 @@ function createRenderer(renderOptions2) {
       if (newIndex == void 0) {
         unmount(prevChild);
       } else {
+        newIndexToOldMapIndex[newIndex - s2] = i2 + 1;
         patch(prevChild, c2[newIndex], el);
       }
     }
-    let toBePatched = e2 - s2 + 1;
+    console.log(newIndexToOldMapIndex, "newIndexToOldMapIndex");
     for (let i2 = toBePatched - 1; i2 >= 0; i2--) {
+      console.log(i2, "i");
       let newIndex = s2 + i2;
       let anchor = c2[newIndex + 1]?.el;
       if (c2[newIndex].el) {

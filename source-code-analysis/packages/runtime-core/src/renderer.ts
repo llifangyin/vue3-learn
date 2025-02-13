@@ -123,9 +123,14 @@ export function createRenderer(renderOptions) {
         // 特殊比对
         // a b c d e q f g => a b   e c d h   f g
 
-        let s1 = i
-        let s2 = i
+        let s1 = i // 老的开始索引
+        let s2 = i// 新的开始索引
         const keyToNewIndexMap = new Map()//映射表用于快速查找，老的是否在新的里面，没有删除，有更新
+        let toBePatched = e2 - s2 + 1//倒序插入的数量
+        // 根据新的节点找到老的位置
+        let newIndexToOldMapIndex = new Array(toBePatched).fill(0);//[0,0,0,0]
+
+
         for(let i = s2;i<=e2;i++){
             const nextChild = c2[i]
             keyToNewIndexMap.set(nextChild.key,i)
@@ -140,13 +145,20 @@ export function createRenderer(renderOptions) {
                 // 老的有新的没有
                 unmount(prevChild)
             }else{
+                //避开0可能是第一个元素 区分新的元素 i+1 从1开始
+                newIndexToOldMapIndex[newIndex - s2] = i + 1
                 patch(prevChild,c2[newIndex],el)
             }
         }
+        console.log(newIndexToOldMapIndex,'newIndexToOldMapIndex');
+        // 求最长递增子序列
+
         // 调整顺序
         // 按照新的队列倒序插入 新的元素多 创建  
-        let toBePatched = e2 - s2 + 1//倒序插入的数量
+
         for(let i = toBePatched-1;i>=0;i--){
+            console.log(i,'i');
+            
             let newIndex = s2 + i//h对应的索引，找他的下一个元素 作为锚点
             let anchor = c2[newIndex + 1]?.el 
             // console.log(anchor,'anchor')
