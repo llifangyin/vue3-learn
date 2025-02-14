@@ -12,18 +12,27 @@
         //     h,
         //     createRenderer,
         //     render,
-        //     Text
+        //     Text,
+        //     Fragment
         // } from './vue.runtime.esm-browser.min.js'
         import {
-        //   renderOptions
             h,
             render,
-            Text
+            Text,
+            Fragment
          } from './runtime-dom.js'
-        render(h(Text, "hello"), app)
+        render(h(Fragment,[
+            h('div',null,'hello'),
+            h('div',null,'world')
+        ]), app)
+
          setTimeout(() => {
             render(null,app)
-        }, 1000)
+            // render(h(Fragment,[
+            //     h('div',null,'hello'),
+            //     h('div',null,'vue')
+            // ]), app)
+        }, 2000)
     </script>
 </body>
 </html>

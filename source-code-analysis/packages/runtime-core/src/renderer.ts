@@ -1,5 +1,5 @@
 import { ShapeFlags } from '@vue/shared';
-import { isSameVnode,Text } from './createVnode';
+import { isSameVnode,Text,Fragment} from './createVnode';
 import { getSequence } from './seq';
 export function createRenderer(renderOptions) {
     // core中不关心如何渲染,可跨平台
@@ -247,6 +247,15 @@ export function createRenderer(renderOptions) {
             }
         }
     }
+    const processFragment = (n1,n2,container) => {
+        if(n1 == null){
+            // 初始化
+            mountChildren(n2.children,container)
+        }else{
+            // 更新
+            patchChildren(n1,n2,container)
+        }
+    }
     const patch = (n1,n2,container, anchor= null) => {
         // 处理虚拟节点
         if(n1 == n2){
@@ -262,6 +271,9 @@ export function createRenderer(renderOptions) {
             case Text:
                 processText(n1,n2,container)
                 break;
+            case Fragment:
+                processFragment(n1,n2,container)
+                break;
             default:
                 processElement(n1,n2,container,anchor)
         }
@@ -271,7 +283,13 @@ export function createRenderer(renderOptions) {
 
     }
     const unmount = (vnode) => {
-        hostRemove(vnode.el)
+        if(vnode.type == Fragment){//数组
+            console.log(vnode,'vnode');
+            
+            unmountChildren(vnode.children)
+        }else{
+            hostRemove(vnode.el)
+        }
     }
     // 多次调用进行虚拟节点比较 再渲染
     const render = (vnode,container)=>{
