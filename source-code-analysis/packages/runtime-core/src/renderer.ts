@@ -1,5 +1,6 @@
 import { ShapeFlags } from '@vue/shared';
 import { isSameVnode } from './createVnode';
+import { getSequence } from './seq';
 export function createRenderer(renderOptions) {
     // core中不关心如何渲染,可跨平台
     const {
@@ -63,6 +64,8 @@ export function createRenderer(renderOptions) {
             }
         }
     }
+    // 全量diff 递归diff
+    // 快速diff 靶向更新
     const patchKeyedChildren = (c1,c2,el) => {
         // 对比两个children差异
 
@@ -155,16 +158,22 @@ export function createRenderer(renderOptions) {
 
         // 调整顺序
         // 按照新的队列倒序插入 新的元素多 创建  
-
+        // 获取最长子序列
+        const increasingSeq = getSequence(newIndexToOldMapIndex)
+        console.log(increasingSeq,'increasingSeq')
+        let j = increasingSeq.length - 1;//最后一项
         for(let i = toBePatched-1;i>=0;i--){
-            console.log(i,'i');
             
             let newIndex = s2 + i//h对应的索引，找他的下一个元素 作为锚点
             let anchor = c2[newIndex + 1]?.el 
             // console.log(anchor,'anchor')
             if(c2[newIndex].el){
                 // 列表中已存在的元素
-                hostInsert(c2[newIndex].el,el,anchor)
+                if(i == increasingSeq[j]){
+                    j-- ; // 递减 不做新增处理 diff优化
+                }else{
+                    hostInsert(c2[newIndex].el,el,anchor)
+                }
             }else{
                 // 新元素
                 patch(null,c2[newIndex],el,anchor)

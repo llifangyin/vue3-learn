@@ -170,6 +170,48 @@ function h(type, propsOrChildren, children) {
   }
 }
 
+// packages/runtime-core/src/seq.ts
+function getSequence(arr) {
+  const result = [0];
+  let start;
+  let end;
+  let middle;
+  const parentNodeIndex = result.slice(0);
+  const len = arr.length;
+  for (let i = 0; i < len; i++) {
+    const arrI = arr[i];
+    if (arrI != 0) {
+      const resultLastIndex = result[result.length - 1];
+      if (arr[resultLastIndex] < arrI) {
+        result.push(i);
+        parentNodeIndex[i] = resultLastIndex;
+        continue;
+      }
+    }
+    start = 0;
+    end = result.length - 1;
+    while (start < end) {
+      middle = (start + end) / 2 | 0;
+      if (arr[result[middle]] < arrI) {
+        start = middle + 1;
+      } else {
+        end = middle;
+      }
+    }
+    if (arrI < arr[result[start]]) {
+      result[start] = i;
+      parentNodeIndex[i] = result[start - 1];
+    }
+  }
+  let l = result.length;
+  let last = result[l - 1];
+  while (l-- > 0) {
+    result[l] = last;
+    last = parentNodeIndex[last];
+  }
+  return result;
+}
+
 // packages/runtime-core/src/renderer.ts
 function createRenderer(renderOptions2) {
   const {
@@ -284,12 +326,18 @@ function createRenderer(renderOptions2) {
       }
     }
     console.log(newIndexToOldMapIndex, "newIndexToOldMapIndex");
+    const increasingSeq = getSequence(newIndexToOldMapIndex);
+    console.log(increasingSeq, "increasingSeq");
+    let j = increasingSeq.length - 1;
     for (let i2 = toBePatched - 1; i2 >= 0; i2--) {
-      console.log(i2, "i");
       let newIndex = s2 + i2;
       let anchor = c2[newIndex + 1]?.el;
       if (c2[newIndex].el) {
-        hostInsert(c2[newIndex].el, el, anchor);
+        if (i2 == increasingSeq[j]) {
+          j--;
+        } else {
+          hostInsert(c2[newIndex].el, el, anchor);
+        }
       } else {
         patch(null, c2[newIndex], el, anchor);
       }
