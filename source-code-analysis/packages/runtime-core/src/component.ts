@@ -77,15 +77,15 @@ export function setupComponent(instance){
     initProps(instance,vnode.props) //赋值属性
     instance.proxy = new Proxy(instance,handler)//赋值代理对象
 
-    const {data,render} = vnode.type
+    const {data={},render} = vnode.type
     // const { data = ()=>{},render ,props:propsOptions={}} = vnode.type // 为什么这里是type    
         // h=> return createVNode(type,propsOrChildren,children) 第一个参数是type : { data,render }
     if(!isFunction(data)){
         // data中可以拿到proxy
         console.warn('data must be a function');
+    }else{
+        instance.data = reactive(data.call(instance.proxy))
     }
-    
-    instance.data = reactive(data.call(instance.proxy))
 
     instance.render  = render
 

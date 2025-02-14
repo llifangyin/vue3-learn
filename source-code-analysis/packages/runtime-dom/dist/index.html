@@ -22,46 +22,35 @@
             Text,
             Fragment
          } from './runtime-dom.js'
-        
+         
+
+        //  组件更新 有三种方式 （状态  属性 插槽）
+
+        const renderComponent = {
+            props:{
+                address:String
+            },
+            render(){
+                return h('div',null,this.address)
+            }
+        }
         const vueComponent = {
             data() {
                 return {
-                    x: '1',
-                    y: 2
+                   flag:true,address:'北京'
                 }
             },
-            props:{
-                name: String,
-                age: Number
-            },
             render(proxy){
-                console.log('render', proxy)
-                // console.log(this, 'this')
-                // console.log(this === proxy, 'this == proxy')
-                // setTimeout(() => {
-                //     this.age++
-                // }, 1000);
-                // this === 组件实例 内部不会通过类创建实例
-                // attrs 非响应式
-                // props 响应式
-
-                // 组件所有的属性 - props = attrs
-                return h('div',{name:'test'},[
-                    h(Text,null, '$attrs_name:'+ proxy.$attrs.a),
-                    h('div',null,'$attrs_age:'+ this.$attrs.b),
-                    h(Text,null, 'proxy.x:'+ proxy.x),
-                    h('div',null,'proxy.y:'+ proxy.y),
-                    h(Text,null, 'proxy.name:'+ proxy.name),
-                    h('div',null,'proxy.age:'+ proxy.age)
+                return h(Fragment,null,[
+                    h('button',{onClick:()=>{this.flag = !this.flag}},'点击切换'),
+                    h(renderComponent,{
+                        address:this.flag?'北京':'上海'
+                    })
                 ])
             }
         }
-        // 组件 由两个 部分组成 
-        // 一个是组件的虚拟节点  vnode
-        // render函数返回的虚拟节点，这个虚拟节点才是最终渲染的内容  subTree
-        render(h(vueComponent,{a:1,b:2,name:'zhangsan',age:'20'}), app)
      
-
+        render(h(vueComponent,{}), app)
     </script>
 </body>
 </html>

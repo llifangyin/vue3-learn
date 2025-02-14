@@ -492,11 +492,12 @@ function setupComponent(instance) {
   const { vnode } = instance;
   initProps(instance, vnode.props);
   instance.proxy = new Proxy(instance, handler);
-  const { data, render: render2 } = vnode.type;
+  const { data = {}, render: render2 } = vnode.type;
   if (!isFunction(data)) {
     console.warn("data must be a function");
+  } else {
+    instance.data = reactive(data.call(instance.proxy));
   }
-  instance.data = reactive(data.call(instance.proxy));
   instance.render = render2;
 }
 
@@ -717,10 +718,42 @@ function createRenderer(renderOptions2) {
     setupComponent(instance);
     setupRenderEffect(instance, container, anchor);
   };
+  const hasPropsChange = (prevProps, nextProps) => {
+    const nextKeys = Object.keys(nextProps);
+    if (prevProps.length !== nextKeys.length) {
+      return true;
+    }
+    for (let i = 0; i < nextKeys.length; i++) {
+      const key = nextKeys[i];
+      if (prevProps[key] !== nextProps[key]) {
+        return true;
+      }
+    }
+    return false;
+  };
+  const updateProps = (instance, prevProps, nextProps) => {
+    if (hasPropsChange(prevProps, nextProps)) {
+      for (let key in nextProps) {
+        instance.props[key] = nextProps[key];
+      }
+      for (let key in prevProps) {
+        if (!(key in nextProps)) {
+          delete instance.props[key];
+        }
+      }
+    }
+  };
+  const updateComponent = (n1, n2) => {
+    const instance = n2.component = n1.component;
+    const { props: prevProps } = n1;
+    const { props: nextProps } = n2;
+    updateProps(instance, prevProps, nextProps);
+  };
   const processComponent = (n1, n2, container, anchor) => {
     if (n1 == null) {
       mountComponent(n2, container, anchor);
     } else {
+      updateComponent(n1, n2);
     }
   };
   const patch = (n1, n2, container, anchor = null) => {

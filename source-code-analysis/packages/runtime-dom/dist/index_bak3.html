@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vue3源码解析</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script type="module">
+        // import { 
+        //     h,
+        //     createRenderer,
+        //     render,
+        //     Text,
+        //     Fragment
+        // } from './vue.runtime.esm-browser.min.js'
+
+        import {
+            h,
+            render,
+            Text,
+            Fragment
+         } from './runtime-dom.js'
+        
+        const vueComponent = {
+            data() {
+                return {
+                    x: '1',
+                    y: 2
+                }
+            },
+            props:{
+                name: String,
+                age: Number
+            },
+            render(proxy){
+                console.log('render', proxy)
+                // console.log(this, 'this')
+                // console.log(this === proxy, 'this == proxy')
+                // setTimeout(() => {
+                //     this.age++
+                // }, 1000);
+                // this === 组件实例 内部不会通过类创建实例
+                // attrs 非响应式
+                // props 响应式
+
+                // 组件所有的属性 - props = attrs
+                return h('div',{name:'test'},[
+                    h(Text,null, '$attrs_name:'+ proxy.$attrs.a),
+                    h('div',null,'$attrs_age:'+ this.$attrs.b),
+                    h(Text,null, 'proxy.x:'+ proxy.x),
+                    h('div',null,'proxy.y:'+ proxy.y),
+                    h(Text,null, 'proxy.name:'+ proxy.name),
+                    h('div',null,'proxy.age:'+ proxy.age)
+                ])
+            }
+        }
+        // 组件 由两个 部分组成 
+        // 一个是组件的虚拟节点  vnode
+        // render函数返回的虚拟节点，这个虚拟节点才是最终渲染的内容  subTree
+        render(h(vueComponent,{a:1,b:2,name:'zhangsan',age:'20'}), app)
+     
+
+    </script>
+</body>
+</html>

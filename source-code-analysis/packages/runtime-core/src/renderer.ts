@@ -296,10 +296,45 @@ export function createRenderer(renderOptions) {
         const   instance = vnode.component = createComponentInstance(vnode)
 
         // 2. 给实例的属性赋值
+        
         setupComponent(instance)//初始化props data等
- 
         // 3. 创建一个effect
         setupRenderEffect(instance,container,anchor)
+    }
+    const hasPropsChange = (prevProps,nextProps) => {
+        const nextKeys = Object.keys(nextProps)
+        if(prevProps.length !== nextKeys.length){
+            return true
+        }
+        for(let i = 0;i<nextKeys.length;i++){
+            const key = nextKeys[i]
+            if(prevProps[key] !== nextProps[key]){
+                return true
+            }
+        }
+        return false
+    }
+    const updateProps = (instance,prevProps,nextProps) => {
+      if(hasPropsChange(prevProps,nextProps)){
+        // 覆盖新的
+            for(let key in nextProps){
+               instance.props[key] = nextProps[key]
+            }
+            // 删除老的
+            for(let key in prevProps){
+              if(!(key in nextProps)){
+                delete instance.props[key] 
+              }
+            }
+      }
+    }
+    const updateComponent = (n1,n2) => {
+        const instance = n2.component = n1.component //复用实例
+        const {props:prevProps} = n1
+        const {props:nextProps} = n2
+        // 更新props
+        updateProps(instance,prevProps,nextProps)
+
     }
     const processComponent = (n1,n2,container,anchor) => {
         if(n1 == null){
@@ -308,7 +343,9 @@ export function createRenderer(renderOptions) {
         }else{
             // 元素更新 n2.el = n1.el
              // 组件更新 n2.subTree = n1.subTree
-            // patchComponent(n1,n2,container)
+            //  状态变了直接触发effect
+            // 属性变了触发该方法
+            updateComponent(n1,n2)
         }
     }
     const patch = (n1,n2,container, anchor= null) => {
