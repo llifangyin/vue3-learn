@@ -398,6 +398,26 @@ function createReactiveObject(target) {
   return proxy;
 }
 
+// packages/runtime-core/src/scheduler.ts
+var queue = [];
+var isFlushing = false;
+var resolvedPromise = Promise.resolve();
+function queueJob(job) {
+  if (!queue.includes(job)) {
+    queue.push(job);
+  }
+  if (!isFlushing) {
+    isFlushing = true;
+    resolvedPromise.then(() => {
+      isFlushing = false;
+      let copy = queue.slice(0);
+      queue.length = 0;
+      copy.forEach((job2) => job2());
+      copy.length = 0;
+    });
+  }
+}
+
 // packages/runtime-core/src/renderer.ts
 function createRenderer(renderOptions2) {
   const {
@@ -586,19 +606,44 @@ function createRenderer(renderOptions2) {
       patchChildren(n1, n2, container);
     }
   };
-  const mountComponent = (n2, container, anchor) => {
+  const initProps = (instance, rawProps) => {
+    const props = {};
+    const attrs = {};
+    const propsOptions = instance.propsOptions || {};
+    if (rawProps) {
+      for (let key in rawProps) {
+        const value = rawProps[key];
+        if (key in propsOptions) {
+          props[key] = value;
+        } else {
+          attrs[key] = value;
+        }
+      }
+    }
+    instance.props = reactive(props);
+    instance.attrs = attrs;
+  };
+  const mountComponent = (vnode, container, anchor) => {
     const { data = () => {
-    }, render: render3 } = n2.type;
+    }, render: render3, props: propsOptions = {} } = vnode.type;
     const state = reactive(data());
     const instance = {
       state,
-      vnode: n2,
+      vnode,
       subTree: null,
       //子树
       isMounted: false,
-      update: null
+      update: null,
       //更新函数
+      props: {},
+      attrs: {},
+      propsOptions,
+      //用户传入的props
+      component: null
     };
+    vnode.component = instance;
+    initProps(instance, vnode.props);
+    console.log(instance, "instance");
     const componentUpdateFn = () => {
       if (!instance.isMounted) {
         const subTree = render3.call(state, state);
@@ -612,13 +657,13 @@ function createRenderer(renderOptions2) {
         instance.subTree = next;
       }
     };
+    const effect3 = new ReactiveEffect(
+      componentUpdateFn,
+      () => queueJob(update)
+    );
     const update = instance.update = () => {
       effect3.run();
     };
-    const effect3 = new ReactiveEffect(
-      componentUpdateFn,
-      () => update()
-    );
     update();
   };
   const processComponent = (n1, n2, container, anchor) => {
