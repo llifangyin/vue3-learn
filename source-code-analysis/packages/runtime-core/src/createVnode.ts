@@ -2,7 +2,7 @@ import { isString, ShapeFlags } from "@vue/shared";
 export function isVnode(vnode){
     return vnode.__v_isVNode
 }
-
+export const Text = Symbol('Text')
 export function createVNode(type, props, children?) {
     const shapeFlag = isString(type) ? ShapeFlags.ELEMENT : 0;
     const vnode = {

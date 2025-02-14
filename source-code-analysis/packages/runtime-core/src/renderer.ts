@@ -1,5 +1,5 @@
 import { ShapeFlags } from '@vue/shared';
-import { isSameVnode } from './createVnode';
+import { isSameVnode,Text } from './createVnode';
 import { getSequence } from './seq';
 export function createRenderer(renderOptions) {
     // core中不关心如何渲染,可跨平台
@@ -234,6 +234,19 @@ export function createRenderer(renderOptions) {
         patchProps(el,oldProps,newProps)
         patchChildren(n1,n2,el)
     }
+    const processText = (n1,n2,container) => {
+        if(n1 == null){
+            // 初始化
+            n2.el = hostCreateText(n2.children,container)
+            hostInsert(n2.el,container)
+        }else{
+            // 更新
+            const el = n2.el = n1.el
+            if(n1.children !== n2.children){
+                hostSetText(el,n2.children)
+            }
+        }
+    }
     const patch = (n1,n2,container, anchor= null) => {
         // 处理虚拟节点
         if(n1 == n2){
@@ -244,8 +257,16 @@ export function createRenderer(renderOptions) {
             unmount(n1)
             n1 = null
         }
+        const {type} = n2
+        switch(type){
+            case Text:
+                processText(n1,n2,container)
+                break;
+            default:
+                processElement(n1,n2,container,anchor)
+        }
         // n1.shapeFlag区分
-        processElement(n1,n2,container,anchor)
+        // processElement(n1,n2,container,anchor)
         
 
     }
@@ -260,13 +281,11 @@ export function createRenderer(renderOptions) {
                 // 移出dom元素
                unmount(container._vnode)
             }
+        }else{
+            // 将虚拟节点变成真实节点渲染
+            patch( container._vnode ||null,vnode,container)
+            container._vnode = vnode // 保存虚拟节点
         }
-        // 将虚拟节点变成真实节点渲染
-        patch( container._vnode ||null,vnode,container)
-
-        container._vnode = vnode // 保存虚拟节点
-
-
     }
     return {
         render

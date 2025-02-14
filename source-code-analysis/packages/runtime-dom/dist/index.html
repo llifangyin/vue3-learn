@@ -8,19 +8,22 @@
 <body>
     <div id="app"></div>
     <script type="module">
-        import { 
+        // import { 
+        //     h,
+        //     createRenderer,
+        //     render,
+        //     Text
+        // } from './vue.runtime.esm-browser.min.js'
+        import {
+        //   renderOptions
             h,
-            createRenderer,
             render,
             Text
-        } from './vue.runtime.esm-browser.min.js'
-        // import {
-        // //   renderOptions
-        //     h,
-        //     render
-        //  } from './runtime-dom.js'
+         } from './runtime-dom.js'
         render(h(Text, "hello"), app)
-  
+         setTimeout(() => {
+            render(null,app)
+        }, 1000)
     </script>
 </body>
 </html>
