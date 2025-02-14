@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vue3源码解析</title>
+</head>
+<body>
+    <div id="app"></div>
+    <script type="module">
+        // import { 
+        //     h,
+        //     createRenderer,
+        //     render,
+        //     Text,
+        //     Fragment
+        // } from './vue.runtime.esm-browser.min.js'
+        import {
+            h,
+            render,
+            Text,
+            Fragment
+         } from './runtime-dom.js'
+        render(h(Fragment,[
+            h('div',null,'hello'),
+            h('div',null,'world')
+        ]), app)
+
+         setTimeout(() => {
+            render(null,app)
+            // render(h(Fragment,[
+            //     h('div',null,'hello'),
+            //     h('div',null,'vue')
+            // ]), app)
+        }, 2000)
+    </script>
+</body>
+</html>

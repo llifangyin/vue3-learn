@@ -1,6 +1,7 @@
 import { ShapeFlags } from '@vue/shared';
 import { isSameVnode,Text,Fragment} from './createVnode';
 import { getSequence } from './seq';
+import { reactive, ReactiveEffect } from '@vue/reactivity';
 export function createRenderer(renderOptions) {
     // core中不关心如何渲染,可跨平台
     const {
@@ -153,14 +154,14 @@ export function createRenderer(renderOptions) {
                 patch(prevChild,c2[newIndex],el)
             }
         }
-        console.log(newIndexToOldMapIndex,'newIndexToOldMapIndex');
+        // console.log(newIndexToOldMapIndex,'newIndexToOldMapIndex');
         // 求最长递增子序列
 
         // 调整顺序
         // 按照新的队列倒序插入 新的元素多 创建  
         // 获取最长子序列
         const increasingSeq = getSequence(newIndexToOldMapIndex)
-        console.log(increasingSeq,'increasingSeq')
+        // console.log(increasingSeq,'increasingSeq')
         let j = increasingSeq.length - 1;//最后一项
         for(let i = toBePatched-1;i>=0;i--){
             
@@ -256,6 +257,58 @@ export function createRenderer(renderOptions) {
             patchChildren(n1,n2,container)
         }
     }
+    const mountComponent = (n2,container,anchor) => {
+        // 组件挂载
+        // 可以根据自己的状态 重新渲染
+        // console.log(n2,'n2')
+        // n2是新节点 type props children
+        const { data= ()=>{},render } = n2.type // 为什么这里是type    
+        // h=> return createVNode(type,propsOrChildren,children) 第一个参数是type : { data,render }
+        
+        const state = reactive(data())
+        const instance ={
+            state,
+            vnode:n2,
+            subTree:null,//子树
+            isMounted:false,
+            update:null,//更新函数
+        }
+        const componentUpdateFn = ()=>{
+            // console.log(data(),'data')
+            // 区分第一次创建和更新
+            if(!instance.isMounted){
+                // console.log(render,'render')
+                const subTree = render.call(state,state)//执行render函数
+                // 第一个state是this 第二个是参数
+                // subTree  return h(xxx)是个虚拟节点 即要渲染的虚拟节点
+                instance.subTree = subTree
+                patch(null,subTree,container,anchor)
+                instance.isMounted = true
+            }else{
+                // 更新
+                const prev = instance.subTree
+                const next = render.call(state,state)
+                patch(prev,next,container,anchor)
+                instance.subTree = next
+            }
+
+         }
+         const update = ( instance.update   = ()=>{ effect.run()} )
+        // 响应式数据变化后重新渲染  
+         const effect = new ReactiveEffect(componentUpdateFn,
+            ()=>update()
+        )
+        update()
+    }
+    const processComponent = (n1,n2,container,anchor) => {
+        if(n1 == null){
+            // 初始化
+            mountComponent(n2,container,anchor)
+        }else{
+            // 更新
+            // patchComponent(n1,n2,container)
+        }
+    }
     const patch = (n1,n2,container, anchor= null) => {
         // 处理虚拟节点
         if(n1 == n2){
@@ -266,7 +319,8 @@ export function createRenderer(renderOptions) {
             unmount(n1)
             n1 = null
         }
-        const {type} = n2
+   
+        const {type,shapeFlag} = n2
         switch(type){
             case Text:
                 processText(n1,n2,container)
@@ -275,7 +329,13 @@ export function createRenderer(renderOptions) {
                 processFragment(n1,n2,container)
                 break;
             default:
-                processElement(n1,n2,container,anchor)
+                if(shapeFlag & ShapeFlags.ELEMENT){
+                    processElement(n1,n2,container,anchor)
+                }else if(shapeFlag & ShapeFlags.COMPONENT){
+                    // 组件 vue3中函数式组件废弃了，没有性能节约
+                    
+                    processComponent(n1,n2,container,anchor)
+                }
         }
         // n1.shapeFlag区分
         // processElement(n1,n2,container,anchor)

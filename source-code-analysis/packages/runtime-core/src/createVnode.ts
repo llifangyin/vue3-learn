@@ -1,4 +1,4 @@
-import { isString, ShapeFlags } from "@vue/shared";
+import { isObject, isString, ShapeFlags } from "@vue/shared";
 export function isVnode(vnode){
     return vnode.__v_isVNode
 }
@@ -11,7 +11,11 @@ export const Fragment = Symbol('Fragment')
  * 这对于需要返回多个根节点的情况非常有用。
  */
 export function createVNode(type, props, children?) {
-    const shapeFlag = isString(type) ? ShapeFlags.ELEMENT : 0;
+    const shapeFlag = isString(type) 
+    ? ShapeFlags.ELEMENT //元素
+    :isObject(type)
+    ?ShapeFlags.STATEFUL_COMPONENT://有状态组件
+     0;
     const vnode = {
         __v_isVNode: true,
         type,
