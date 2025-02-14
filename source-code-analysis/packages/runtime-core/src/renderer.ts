@@ -1,8 +1,10 @@
-import { ShapeFlags } from '@vue/shared';
+import { ShapeFlags ,hasOwn} from '@vue/shared';
 import { isSameVnode,Text,Fragment} from './createVnode';
 import { getSequence } from './seq';
 import { reactive, ReactiveEffect } from '@vue/reactivity';
 import { queueJob } from './scheduler';
+import { createComponentInstance, setupComponent } from './component';
+import { render } from '../../runtime-dom/src/index';
 export function createRenderer(renderOptions) {
     // core中不关心如何渲染,可跨平台
     const {
@@ -258,63 +260,16 @@ export function createRenderer(renderOptions) {
             patchChildren(n1,n2,container)
         }
     }
-    const initProps = (instance,rawProps) => {
-        // rawProps 用户传入的props
-        const props = {}
-        const attrs = {}
-        const propsOptions = instance.propsOptions || {} //组件中定义的props
-        // console.log(rawProps,'rawProps')
-        if(rawProps){
-            for(let key in rawProps){
-                const value = rawProps[key] // string | number 
-                if(key in propsOptions){
-                    //props不需要深度结构，组件里不能更改属性 正常是shallowReactive
-                    props[key] = value
-                }else{
-                    attrs[key] = value
-                }
-            }
-        }
-        instance.props = reactive(props)
-        instance.attrs = attrs
-
-    }
-    const mountComponent = (vnode,container,anchor) => {
-        // n2 => vnode
-        // 组件挂载
-        // 可以根据自己的状态 重新渲染
-        // console.log(n2,'n2')
-        // n2是新节点 type props children
-        const { data= ()=>{},render ,props:propsOptions={}} = vnode.type // 为什么这里是type    
-        // h=> return createVNode(type,propsOrChildren,children) 第一个参数是type : { data,render }
-        
-        const state = reactive(data())
-        const instance ={
-            state,
-            vnode:vnode,
-            subTree:null,//子树
-            isMounted:false,
-            update:null,//更新函数
-            props:{},
-            attrs:{},
-            propsOptions,//用户传入的props
-            component:null,
-        }
-        // 根据propsOptions 区分出props 和 attrs
-
-        // 元素更新 n2.el = n1.el
-        // 组件更新 n2.subTree = n1.subTree
-        vnode.component = instance
-        // console.log(propsOptions,'propsOptions')
-        initProps(instance,vnode.props)
-        console.log(instance,'instance')
-
+    // 给组件创建一个ReactiveEffect
+    function  setupRenderEffect(instance,container,anchor) {
         const componentUpdateFn = ()=>{
             // console.log(data(),'data')
             // 区分第一次创建和更新
+            const {render} = instance
             if(!instance.isMounted){
                 // console.log(render,'render')
-                const subTree = render.call(state,state)//执行render函数
+                //  可以被访问到的对象，props state attr
+                const subTree = render.call(instance.proxy,instance.proxy)//执行render函数
                 // 第一个state是this 第二个是参数
                 // subTree  return h(xxx)是个虚拟节点 即要渲染的虚拟节点
                 instance.subTree = subTree
@@ -323,25 +278,36 @@ export function createRenderer(renderOptions) {
             }else{
                 // 更新
                 const prev = instance.subTree
-                const next = render.call(state,state)
+                const next = render.call(instance.proxy,instance.proxy)
                 patch(prev,next,container,anchor)
                 instance.subTree = next
             }
 
          }
          // 响应式数据变化后重新渲染  
-          const effect = new ReactiveEffect(componentUpdateFn,
+        const effect = new ReactiveEffect(componentUpdateFn,
              ()=> queueJob(update)
          )
          const update = ( instance.update   = ()=>{ effect.run()} )
         update()
+    }
+    const mountComponent = (vnode,container,anchor) => {
+        // 1. 创建组件实例
+        const   instance = vnode.component = createComponentInstance(vnode)
+
+        // 2. 给实例的属性赋值
+        setupComponent(instance)//初始化props data等
+ 
+        // 3. 创建一个effect
+        setupRenderEffect(instance,container,anchor)
     }
     const processComponent = (n1,n2,container,anchor) => {
         if(n1 == null){
             // 初始化
             mountComponent(n2,container,anchor)
         }else{
-            // 更新
+            // 元素更新 n2.el = n1.el
+             // 组件更新 n2.subTree = n1.subTree
             // patchComponent(n1,n2,container)
         }
     }

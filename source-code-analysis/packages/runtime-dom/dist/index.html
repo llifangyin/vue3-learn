@@ -26,8 +26,8 @@
         const vueComponent = {
             data() {
                 return {
-                    name: 'test',
-                    age: 18
+                    x: '1',
+                    y: 2
                 }
             },
             props:{
@@ -47,10 +47,12 @@
 
                 // 组件所有的属性 - props = attrs
                 return h('div',{name:'test'},[
-                    // h(Text,null, 'name:'+ proxy.$attrs.name),
-                    // h('span',null,'age:'+ proxy.$attrs.age)
-                    h(Text,null, 'name:'+ proxy.$props.name),
-                    h('span',null,'age:'+ proxy.$props.age)
+                    h(Text,null, '$attrs_name:'+ proxy.$attrs.a),
+                    h('div',null,'$attrs_age:'+ this.$attrs.b),
+                    h(Text,null, 'proxy.x:'+ proxy.x),
+                    h('div',null,'proxy.y:'+ proxy.y),
+                    h(Text,null, 'proxy.name:'+ proxy.name),
+                    h('div',null,'proxy.age:'+ proxy.age)
                 ])
             }
         }

@@ -112,9 +112,14 @@ function patchProp(el, key, preValue, nextValue) {
 function isObject(value) {
   return typeof value === "object" && value !== null;
 }
+function isFunction(value) {
+  return typeof value === "function";
+}
 function isString(value) {
   return typeof value === "string";
 }
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var hasOwn = (val, key) => hasOwnProperty.call(val, key);
 
 // packages/runtime-core/src/createVnode.ts
 function isVnode(vnode) {
@@ -418,6 +423,83 @@ function queueJob(job) {
   }
 }
 
+// packages/runtime-core/src/component.ts
+function createComponentInstance(vnode) {
+  const instance = {
+    data: null,
+    vnode,
+    subTree: null,
+    //子树
+    isMounted: false,
+    update: null,
+    //更新函数
+    props: {},
+    attrs: {},
+    propsOptions: vnode.type.props,
+    //用户传入的props
+    component: null,
+    proxy: null
+    //代理props attrs data 可以直接访问
+  };
+  return instance;
+}
+var initProps = (instance, rawProps) => {
+  const props = {};
+  const attrs = {};
+  const propsOptions = instance.propsOptions || {};
+  if (rawProps) {
+    for (let key in rawProps) {
+      const value = rawProps[key];
+      if (key in propsOptions) {
+        props[key] = value;
+      } else {
+        attrs[key] = value;
+      }
+    }
+  }
+  instance.props = reactive(props);
+  instance.attrs = attrs;
+};
+var publicProperty = {
+  $attrs: (instance) => instance.attrs
+  // ...
+};
+var handler = {
+  get(target, key) {
+    const { data, props } = target;
+    if (data && hasOwn(data, key)) {
+      return data[key];
+    } else if (props && hasOwn(props, key)) {
+      return props[key];
+    }
+    const getter = publicProperty[key];
+    if (getter) {
+      return getter(target);
+    }
+  },
+  set(target, key, value) {
+    const { data, props } = target;
+    if (data && hasOwn(data, key)) {
+      data[key] = value;
+    } else if (props && hasOwn(props, key)) {
+      console.warn("props is readonly");
+      return false;
+    }
+    return true;
+  }
+};
+function setupComponent(instance) {
+  const { vnode } = instance;
+  initProps(instance, vnode.props);
+  instance.proxy = new Proxy(instance, handler);
+  const { data, render: render2 } = vnode.type;
+  if (!isFunction(data)) {
+    console.warn("data must be a function");
+  }
+  instance.data = reactive(data.call(instance.proxy));
+  instance.render = render2;
+}
+
 // packages/runtime-core/src/renderer.ts
 function createRenderer(renderOptions2) {
   const {
@@ -606,53 +688,17 @@ function createRenderer(renderOptions2) {
       patchChildren(n1, n2, container);
     }
   };
-  const initProps = (instance, rawProps) => {
-    const props = {};
-    const attrs = {};
-    const propsOptions = instance.propsOptions || {};
-    if (rawProps) {
-      for (let key in rawProps) {
-        const value = rawProps[key];
-        if (key in propsOptions) {
-          props[key] = value;
-        } else {
-          attrs[key] = value;
-        }
-      }
-    }
-    instance.props = reactive(props);
-    instance.attrs = attrs;
-  };
-  const mountComponent = (vnode, container, anchor) => {
-    const { data = () => {
-    }, render: render3, props: propsOptions = {} } = vnode.type;
-    const state = reactive(data());
-    const instance = {
-      state,
-      vnode,
-      subTree: null,
-      //子树
-      isMounted: false,
-      update: null,
-      //更新函数
-      props: {},
-      attrs: {},
-      propsOptions,
-      //用户传入的props
-      component: null
-    };
-    vnode.component = instance;
-    initProps(instance, vnode.props);
-    console.log(instance, "instance");
+  function setupRenderEffect(instance, container, anchor) {
     const componentUpdateFn = () => {
+      const { render: render3 } = instance;
       if (!instance.isMounted) {
-        const subTree = render3.call(state, state);
+        const subTree = render3.call(instance.proxy, instance.proxy);
         instance.subTree = subTree;
         patch(null, subTree, container, anchor);
         instance.isMounted = true;
       } else {
         const prev = instance.subTree;
-        const next = render3.call(state, state);
+        const next = render3.call(instance.proxy, instance.proxy);
         patch(prev, next, container, anchor);
         instance.subTree = next;
       }
@@ -665,6 +711,11 @@ function createRenderer(renderOptions2) {
       effect3.run();
     };
     update();
+  }
+  const mountComponent = (vnode, container, anchor) => {
+    const instance = vnode.component = createComponentInstance(vnode);
+    setupComponent(instance);
+    setupRenderEffect(instance, container, anchor);
   };
   const processComponent = (n1, n2, container, anchor) => {
     if (n1 == null) {
