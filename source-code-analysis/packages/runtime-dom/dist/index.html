@@ -30,22 +30,38 @@
         // 2、返回对象 可以再render中使用
 
 
-      
+        const renderComponent = {
+            render(proxy){
+                console.log(proxy,'proxy')
+                return h(Fragment,{},[
+                    proxy.$slots.header('___test1'),
+                    h('div',null,'content'),
+                    proxy.$slots.footer('__test2')
+                ])
+            }
+        }
         const vueComponent = {
             setup(props,{emit,attrs,expose,slots}){
                 // console.log(props,attrs,expose,slots)
-              
-                const a = ref(1)
-                setTimeout(() => {
-                    a.value = 2
-                }, 1000);
+                return (proxy)=>{
+                    //  第三个参数是slot 第二个必须要有null
+                    // slot分为默认插槽和具名插槽 还有作用域插槽
+                    return h(renderComponent,null,{
+                        header:(p)=>h('div',null,'header'+p),
+                        footer:(p)=>h('div',null,'footer'+p)
+                    })
+                }
+                // const a = ref(1)
+                // setTimeout(() => {
+                //     a.value = 2
+                // }, 1000);
                 // return  ()=>{
                 //     return h('div',null,a.value)
                 // }
-                return {
-                    a
-                //    a:a.value// 不会触发更新 
-                }
+                // return {
+                //     a
+                // //    a:a.value// 不会触发更新 
+                // }
             },
             render(proxy){
                 // console.log(proxy,'proxy')

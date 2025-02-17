@@ -28,6 +28,8 @@ export function createVNode(type, props, children?) {
     if(children){
         if(Array.isArray(children)){
             vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN
+        }else if(isObject(children)){ //slots 已对象的形式传入
+            vnode.shapeFlag |= ShapeFlags.SLOTS_CHILDREN
         }else{
             children = String(children)
             vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN
