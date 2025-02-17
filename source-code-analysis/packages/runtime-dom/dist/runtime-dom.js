@@ -689,6 +689,23 @@ function createRenderer(renderOptions2) {
       patchChildren(n1, n2, container);
     }
   };
+  const updateProps = (instance, prevProps, nextProps) => {
+    if (hasPropsChange(prevProps, nextProps)) {
+      for (let key in nextProps) {
+        instance.props[key] = nextProps[key];
+      }
+      for (let key in prevProps) {
+        if (!(key in nextProps)) {
+          delete instance.props[key];
+        }
+      }
+    }
+  };
+  const updateComponentPreRender = (instance, nextVNode, container) => {
+    instance.next = null;
+    instance.vnode = nextVNode;
+    updateProps(instance, instance.props, nextVNode.props);
+  };
   function setupRenderEffect(instance, container, anchor) {
     const componentUpdateFn = () => {
       const { render: render3 } = instance;
@@ -698,6 +715,9 @@ function createRenderer(renderOptions2) {
         patch(null, subTree, container, anchor);
         instance.isMounted = true;
       } else {
+        if (instance.next) {
+          updateComponentPreRender(instance, instance.next, container);
+        }
         const prev = instance.subTree;
         const next = render3.call(instance.proxy, instance.proxy);
         patch(prev, next, container, anchor);
@@ -731,23 +751,23 @@ function createRenderer(renderOptions2) {
     }
     return false;
   };
-  const updateProps = (instance, prevProps, nextProps) => {
-    if (hasPropsChange(prevProps, nextProps)) {
-      for (let key in nextProps) {
-        instance.props[key] = nextProps[key];
-      }
-      for (let key in prevProps) {
-        if (!(key in nextProps)) {
-          delete instance.props[key];
-        }
-      }
+  const shouldUpdateComponent = (n1, n2) => {
+    const { props: prevProps, children: preChildren } = n1;
+    const { props: nextProps, children: nextChildren } = n2;
+    if (preChildren || nextChildren) {
+      return true;
     }
+    if (hasPropsChange(prevProps, nextProps)) {
+      return true;
+    }
+    return false;
   };
   const updateComponent = (n1, n2) => {
     const instance = n2.component = n1.component;
-    const { props: prevProps } = n1;
-    const { props: nextProps } = n2;
-    updateProps(instance, prevProps, nextProps);
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2;
+      instance.update();
+    }
   };
   const processComponent = (n1, n2, container, anchor) => {
     if (n1 == null) {
@@ -782,7 +802,6 @@ function createRenderer(renderOptions2) {
   };
   const unmount = (vnode) => {
     if (vnode.type == Fragment) {
-      console.log(vnode, "vnode");
       unmountChildren(vnode.children);
     } else {
       hostRemove(vnode.el);

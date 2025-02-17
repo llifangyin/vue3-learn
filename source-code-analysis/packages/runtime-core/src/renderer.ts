@@ -260,6 +260,27 @@ export function createRenderer(renderOptions) {
             patchChildren(n1,n2,container)
         }
     }
+    const updateProps = (instance,prevProps,nextProps) => {
+        if(hasPropsChange(prevProps,nextProps)){
+          // 覆盖新的
+              for(let key in nextProps){
+                 instance.props[key] = nextProps[key]
+              }
+              // 删除老的
+              for(let key in prevProps){
+                if(!(key in nextProps)){
+                  delete instance.props[key] 
+                }
+              }
+        }
+      }
+    const updateComponentPreRender = (instance,nextVNode,container) => {
+        // 更新props
+        instance.next = null
+        instance.vnode = nextVNode;
+        updateProps(instance,instance.props,nextVNode.props)
+    }
+
     // 给组件创建一个ReactiveEffect
     function  setupRenderEffect(instance,container,anchor) {
         const componentUpdateFn = ()=>{
@@ -276,7 +297,14 @@ export function createRenderer(renderOptions) {
                 patch(null,subTree,container,anchor)
                 instance.isMounted = true
             }else{
-                // 更新
+                // console.log(instance,'instance')
+                // 属性更新或状态更新
+                if(instance.next){
+                    // 更新prop或slot
+                    updateComponentPreRender(instance,instance.next,container)
+
+                }
+                // 基于状态的组件更新
                 const prev = instance.subTree
                 const next = render.call(instance.proxy,instance.proxy)
                 patch(prev,next,container,anchor)
@@ -314,26 +342,34 @@ export function createRenderer(renderOptions) {
         }
         return false
     }
-    const updateProps = (instance,prevProps,nextProps) => {
-      if(hasPropsChange(prevProps,nextProps)){
-        // 覆盖新的
-            for(let key in nextProps){
-               instance.props[key] = nextProps[key]
-            }
-            // 删除老的
-            for(let key in prevProps){
-              if(!(key in nextProps)){
-                delete instance.props[key] 
-              }
-            }
-      }
+    
+
+    const shouldUpdateComponent = (n1,n2) => {
+        const {props:prevProps,children:preChildren} = n1
+        const {props:nextProps,children:nextChildren} = n2
+        if(preChildren || nextChildren){
+            return true
+        }
+        if(hasPropsChange(prevProps,nextProps)){
+            return true
+        }
+        return false
     }
     const updateComponent = (n1,n2) => {
         const instance = n2.component = n1.component //复用实例
-        const {props:prevProps} = n1
-        const {props:nextProps} = n2
-        // 更新props
-        updateProps(instance,prevProps,nextProps)
+         // 更新属性 和 组件更新两处了 ，合并为一处
+        // const {props:prevProps} = n1
+        // const {props:nextProps} = n2
+        // // 更新props
+        // updateProps(instance,prevProps,nextProps)
+        // 是否需要更新
+        if(shouldUpdateComponent(n1,n2)){
+            //赋值最新的节点 有next说明是属性更新或插槽更新 没有是状态更新
+            instance.next = n2
+            instance.update() //更新组件
+        }
+
+
 
     }
     const processComponent = (n1,n2,container,anchor) => {
@@ -383,7 +419,7 @@ export function createRenderer(renderOptions) {
     }
     const unmount = (vnode) => {
         if(vnode.type == Fragment){//数组
-            console.log(vnode,'vnode');
+            // console.log(vnode,'vnode');
             
             unmountChildren(vnode.children)
         }else{
