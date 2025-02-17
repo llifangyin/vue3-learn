@@ -13,7 +13,6 @@
         //     createRenderer,
         //     render,
         //     Text,
-        //     ref,
         //     Fragment
         // } from './vue.runtime.esm-browser.min.js'
 
@@ -21,35 +20,33 @@
             h,
             render,
             Text,
-            Fragment,
-            ref
+            Fragment
          } from './runtime-dom.js'
          
-        //  setup函数，每个组件只会执行一次，支持composition API 
-        // 1、返回render函数
-        // 2、返回对象 可以再render中使用
 
+        //  组件更新 有三种方式 （状态  属性 插槽）
 
-      
+        const renderComponent = {
+            props:{
+                address:String
+            },
+            render(){
+                return h('div',null,this.address)
+            }
+        }
         const vueComponent = {
-            setup(props,{emit,attrs,expose,slots}){
-                // console.log(props,attrs,expose,slots)
-              
-                const a = ref(1)
-                setTimeout(() => {
-                    a.value = 2
-                }, 1000);
-                // return  ()=>{
-                //     return h('div',null,a.value)
-                // }
+            data() {
                 return {
-                    a
-                //    a:a.value// 不会触发更新 
+                   flag:true,address:'北京'
                 }
             },
             render(proxy){
-                // console.log(proxy,'proxy')
-                return h('div',proxy.a)
+                return h(Fragment,null,[
+                    h('button',{onClick:()=>{this.flag = !this.flag}},'点击切换'),
+                    h(renderComponent,{
+                        address:this.flag?'北京':'上海'
+                    })
+                ])
             }
         }
      
