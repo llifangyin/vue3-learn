@@ -1,6 +1,6 @@
-- [ ] L37 整合组件更新流程
-- [ ] L38 setup入口实现
-- [ ] L39 插槽实现
+- [x] L37 整合组件更新流程
+- [x] L38 setup入口实现
+- [x] L39 插槽实现
 - [ ] L40 组件emit 以及卸载
 - [ ] L41 teleport实现
 - [ ] L42 provide inject实现

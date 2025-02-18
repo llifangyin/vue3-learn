@@ -16,6 +16,7 @@ export function createComponentInstance(vnode){
         component:null,
         proxy:null,//代理props attrs data 可以直接访问
         setupState:null,// setup返回的状态
+        exposed:null,
     }
 
     return instance
@@ -97,7 +98,22 @@ export function setupComponent(instance){
     if(setup){
         // setupcontext [attrs,slots,emit]
         const setupContext = {
-
+            slots:instance.slots,
+            attrs:instance.attrs,
+            emit:(event,...payload)=>{
+                // onMyEvent
+                // console.log(event[0],'event');
+                const eventName = `on${event[0].toUpperCase()}${event.slice(1)}`
+                const handler = instance.vnode.props[eventName]
+                // console.log(handler,'handler');
+                console.log(payload,'payload');
+                if(handler){
+                    handler(...payload)
+                }
+            },
+            expose(value){
+                instance.exposed = value
+            }
         }
         const setupResult = setup(instance.props,setupContext)
 

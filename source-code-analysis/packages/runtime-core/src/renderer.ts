@@ -418,11 +418,16 @@ export function createRenderer(renderOptions) {
 
     }
     const unmount = (vnode) => {
+        const {shapeFlag} = vnode
         if(vnode.type == Fragment){//数组
             // console.log(vnode,'vnode');
             
             unmountChildren(vnode.children)
-        }else{
+        }else if(shapeFlag & ShapeFlags.COMPONENT){
+            // 组件
+            unmount(vnode.component.subTree)
+
+        } else{
             hostRemove(vnode.el)
         }
     }

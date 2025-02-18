@@ -14,7 +14,8 @@
         //     render,
         //     Text,
         //     ref,
-        //     Fragment
+        //     Fragment,
+        //     getCurrentInstance
         // } from './vue.runtime.esm-browser.min.js'
 
         import {
@@ -25,51 +26,29 @@
             ref
          } from './runtime-dom.js'
          
-        //  setup函数，每个组件只会执行一次，支持composition API 
-        // 1、返回render函数
-        // 2、返回对象 可以再render中使用
-
-
-        const renderComponent = {
-            render(proxy){
-                console.log(proxy,'proxy')
-                return h(Fragment,{},[
-                    proxy.$slots.header('___test1'),
-                    h('div',null,'content'),
-                    proxy.$slots.footer('__test2')
-                ])
-            }
-        }
         const vueComponent = {
-            setup(props,{emit,attrs,expose,slots}){
-                // console.log(props,attrs,expose,slots)
+            setup(props,{attrs,slots,emit,expose}){
+                expose({
+                    a:1
+                })
+                // const instance = getCurrentInstance()
+                // console.log(instance)
                 return (proxy)=>{
-                    //  第三个参数是slot 第二个必须要有null
-                    // slot分为默认插槽和具名插槽 还有作用域插槽
-                    return h(renderComponent,null,{
-                        header:(p)=>h('div',null,'header'+p),
-                        footer:(p)=>h('div',null,'footer'+p)
-                    })
+                    return h('button',
+                    {
+                        onClick:()=>
+                            emit('myEvent',100)
+                        
+                    },
+                    'click me')
                 }
-                // const a = ref(1)
-                // setTimeout(() => {
-                //     a.value = 2
-                // }, 1000);
-                // return  ()=>{
-                //     return h('div',null,a.value)
-                // }
-                // return {
-                //     a
-                // //    a:a.value// 不会触发更新 
-                // }
-            },
-            render(proxy){
-                // console.log(proxy,'proxy')
-                return h('div',proxy.a)
             }
         }
      
-        render(h(vueComponent,{}), app)
+        render(h(vueComponent,{onMyEvent:(val)=>{console.log(val)}}), app)
+        setTimeout(() => {
+        render(h(null,{onMyEvent:(val)=>{console.log(val)}}), app)
+    }, 1000);
     </script>
 </body>
 </html>

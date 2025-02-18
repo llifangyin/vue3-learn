@@ -660,8 +660,9 @@ function createComponentInstance(vnode) {
     component: null,
     proxy: null,
     //代理props attrs data 可以直接访问
-    setupState: null
+    setupState: null,
     // setup返回的状态
+    exposed: null
   };
   return instance;
 }
@@ -730,7 +731,21 @@ function setupComponent(instance) {
   const { data = () => {
   }, render: render2, setup } = vnode.type;
   if (setup) {
-    const setupContext = {};
+    const setupContext = {
+      slots: instance.slots,
+      attrs: instance.attrs,
+      emit: (event, ...payload) => {
+        const eventName = `on${event[0].toUpperCase()}${event.slice(1)}`;
+        const handler2 = instance.vnode.props[eventName];
+        console.log(payload, "payload");
+        if (handler2) {
+          handler2(...payload);
+        }
+      },
+      expose(value) {
+        instance.exposed = value;
+      }
+    };
     const setupResult = setup(instance.props, setupContext);
     if (isFunction(setupResult)) {
       instance.render = setupResult;
@@ -1048,8 +1063,11 @@ function createRenderer(renderOptions2) {
     }
   };
   const unmount = (vnode) => {
+    const { shapeFlag } = vnode;
     if (vnode.type == Fragment) {
       unmountChildren(vnode.children);
+    } else if (shapeFlag & 6 /* COMPONENT */) {
+      unmount(vnode.component.subTree);
     } else {
       hostRemove(vnode.el);
     }
