@@ -1,8 +1,25 @@
 import { proxyRefs, reactive } from "@vue/reactivity"
 import { hasOwn, isFunction, ShapeFlags } from "@vue/shared"
 
-export function createComponentInstance(vnode){
 
+export let currentInstance = {
+        data:null,
+        vnode:null,
+        subTree:null,//子树
+        isMounted:false,
+        update:null,//更新函数
+        props:{},
+        attrs:{},
+        slots:{},//插槽
+        propsOptions:{},//用户传入的props
+        component:null,
+        proxy:null,//代理props attrs data 可以直接访问
+        setupState:null,// setup返回的状态
+        exposed:null,
+        parent:null,
+        provides:Object.create(null)
+}
+export function createComponentInstance(vnode,parentComponent){
     const instance ={
         data:null,
         vnode:vnode,
@@ -17,8 +34,10 @@ export function createComponentInstance(vnode){
         proxy:null,//代理props attrs data 可以直接访问
         setupState:null,// setup返回的状态
         exposed:null,
+        parent:parentComponent,
+        provides:parentComponent?parentComponent.provides: Object.create(null) //没有原型链的对象
     }
-
+    currentInstance = instance 
     return instance
 }
 const initProps = (instance,rawProps) => {
@@ -141,3 +160,4 @@ export function setupComponent(instance){
     }
 
 }
+

@@ -1,9 +1,9 @@
 - [x] L37 整合组件更新流程
 - [x] L38 setup入口实现
 - [x] L39 插槽实现
-- [ ] L40 组件emit 以及卸载
-- [ ] L41 teleport实现
-- [ ] L42 provide inject实现
+- [x] L40 组件emit 以及卸载
+- [x] L41 teleport实现
+- [x] L42 provide inject实现
 - [ ] L43 函数式组件原理
 - [ ] L44 ref实现原理
 - [ ] L45 生命周期原理

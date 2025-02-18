@@ -4,7 +4,7 @@ import { getSequence } from './seq';
 import { reactive, ReactiveEffect } from '@vue/reactivity';
 import { queueJob } from './scheduler';
 import { createComponentInstance, setupComponent } from './component';
-import { render } from '../../runtime-dom/src/index';
+import { h } from './h';
 export function createRenderer(renderOptions) {
     // core中不关心如何渲染,可跨平台
     const {
@@ -18,12 +18,21 @@ export function createRenderer(renderOptions) {
         nextSibling: hostNextSibling,
         patchProp: hostPatchProp
     } = renderOptions
-    const mountChildren = (children,container,parentComponent?) => {
+    const normalize = (children) => {
         for(let i = 0;i<children.length;i++){
-            patch(null,children[i],container)
+            if(typeof  children[i] == 'string' || typeof  children[i] == 'number'){
+                 children[i] = h(Text,null, String( children[i]))
+            }
+        }
+        return children
+    }
+    const mountChildren = (children,container,parentComponent) => {
+        for(let i = 0;i<children.length;i++){
+            normalize(children)
+            patch(null, children[i],container,parentComponent)
         }
     }
-    const mountElement = (vnode,container,anchor) => {
+    const mountElement = (vnode,container,anchor,parentComponent) => {
         const {type,props,children,shapeFlag} = vnode
         // ShapeFlags通过位运算判断节点类型
         // 第一次渲染时 虚拟节点和真实节点创建关联
@@ -40,18 +49,18 @@ export function createRenderer(renderOptions) {
             hostSetElementText(el,children)
         }else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
             // 数组
-            mountChildren(children,el)
+            mountChildren(children,el,parentComponent)
         }
 
         hostInsert(el,container,anchor)
     }
     // 处理虚拟节点
-    const processElement = (n1,n2,container,anchor) => {
+    const processElement = (n1,n2,container,anchor,parentComponent) => {
         if(n1 == null){
             // 初始化
-            mountElement(n2,container,anchor)
+            mountElement(n2,container,anchor,parentComponent)
         }else{
-            patchElement(n1,n2,container)
+            patchElement(n1,n2,container,parentComponent)
         }
     }
     const patchProps = (el,oldProps,newProps) => {
@@ -190,9 +199,11 @@ export function createRenderer(renderOptions) {
             unmount(children[i])
         }
     }
-    const patchChildren = (n1,n2,el) => {
+   
+    const patchChildren = (n1,n2,el,parentComponent) => {
         const c1 = n1.children
-        const c2 = n2.children
+        const  c2 = normalize (n2.children)
+
         const prevShapeFlag = n1.shapeFlag
         const shapeFlag = n2.shapeFlag
  
@@ -222,7 +233,7 @@ export function createRenderer(renderOptions) {
                 }
                 if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
                     // 新的是数组
-                    mountChildren(c2,el)
+                    mountChildren(c2,el,parentComponent)
                 }
             }
 
@@ -230,13 +241,13 @@ export function createRenderer(renderOptions) {
     }
 
     // 比较新旧节点
-    const patchElement = (n1,n2,container) => {
+    const patchElement = (n1,n2,container,parentComponent) => {
         // 比较差异
         let el = n2.el = n1.el 
         let oldProps = n1.props || {}
         let newProps = n2.props || {}
         patchProps(el,oldProps,newProps)
-        patchChildren(n1,n2,el)
+        patchChildren(n1,n2,el,parentComponent)
     }
     const processText = (n1,n2,container) => {
         if(n1 == null){
@@ -251,13 +262,13 @@ export function createRenderer(renderOptions) {
             }
         }
     }
-    const processFragment = (n1,n2,container) => {
+    const processFragment = (n1,n2,container,parentComponent) => {
         if(n1 == null){
             // 初始化
-            mountChildren(n2.children,container)
+            mountChildren(n2.children,container,parentComponent)
         }else{
             // 更新
-            patchChildren(n1,n2,container)
+            patchChildren(n1,n2,container,parentComponent)
         }
     }
     const updateProps = (instance,prevProps,nextProps) => {
@@ -282,7 +293,7 @@ export function createRenderer(renderOptions) {
     }
 
     // 给组件创建一个ReactiveEffect
-    function  setupRenderEffect(instance,container,anchor) {
+    function  setupRenderEffect(instance,container,anchor,parentComponent) {
         const componentUpdateFn = ()=>{
             // console.log(data(),'data')
             // 区分第一次创建和更新
@@ -294,7 +305,7 @@ export function createRenderer(renderOptions) {
                 // 第一个state是this 第二个是参数
                 // subTree  return h(xxx)是个虚拟节点 即要渲染的虚拟节点
                 instance.subTree = subTree
-                patch(null,subTree,container,anchor)
+                patch(null,subTree,container,anchor,instance)
                 instance.isMounted = true
             }else{
                 // console.log(instance,'instance')
@@ -307,7 +318,7 @@ export function createRenderer(renderOptions) {
                 // 基于状态的组件更新
                 const prev = instance.subTree
                 const next = render.call(instance.proxy,instance.proxy)
-                patch(prev,next,container,anchor)
+                patch(prev,next,container,anchor,instance)
                 instance.subTree = next
             }
 
@@ -319,15 +330,15 @@ export function createRenderer(renderOptions) {
          const update = ( instance.update   = ()=>{ effect.run()} )
         update()
     }
-    const mountComponent = (vnode,container,anchor) => {
+    const mountComponent = (vnode,container,anchor,parentComponent) => {
         // 1. 创建组件实例
-        const   instance = vnode.component = createComponentInstance(vnode)
+        const   instance = vnode.component = createComponentInstance(vnode,parentComponent)
 
         // 2. 给实例的属性赋值
         
         setupComponent(instance)//初始化props data等
         // 3. 创建一个effect
-        setupRenderEffect(instance,container,anchor)
+        setupRenderEffect(instance,container,anchor,parentComponent)
     }
     const hasPropsChange = (prevProps,nextProps) => {
         const nextKeys = Object.keys(nextProps)
@@ -372,10 +383,10 @@ export function createRenderer(renderOptions) {
 
 
     }
-    const processComponent = (n1,n2,container,anchor) => {
+    const processComponent = (n1,n2,container,anchor,parentComponent) => {
         if(n1 == null){
             // 初始化
-            mountComponent(n2,container,anchor)
+            mountComponent(n2,container,anchor,parentComponent)
         }else{
             // 元素更新 n2.el = n1.el
              // 组件更新 n2.subTree = n1.subTree
@@ -384,7 +395,7 @@ export function createRenderer(renderOptions) {
             updateComponent(n1,n2)
         }
     }
-    const patch = (n1,n2,container, anchor= null) => {
+    const patch = (n1,n2,container, anchor= null,parentComponent = null) => {
         // 处理虚拟节点
         if(n1 == n2){
             return
@@ -401,27 +412,28 @@ export function createRenderer(renderOptions) {
                 processText(n1,n2,container)
                 break;
             case Fragment:
-                processFragment(n1,n2,container)
+                processFragment(n1,n2,container,parentComponent)
                 break;
             default:
+                // 元素
                 if(shapeFlag & ShapeFlags.ELEMENT){
-                    processElement(n1,n2,container,anchor)
+                    processElement(n1,n2,container,anchor,parentComponent)
                 }else if(shapeFlag & ShapeFlags.TELEPORT){
-                    type.process(n1,n2,container,anchor,  null,{
+                    type.process(n1,n2,container,anchor,  parentComponent,{
                         mountChildren,
                         patchChildren,
                         move(vnode,container,anchor){
                             hostInsert(
                                 vnode.component?vnode.component.subTree:vnode.el,
                                 container,
-                                null,//parentComponet
+                                parentComponent,//parentComponet
                                 anchor
                             )
                         }
                     })
                 }else if(shapeFlag & ShapeFlags.COMPONENT){
                     // 组件 vue3中函数式组件废弃了，没有性能节约
-                    processComponent(n1,n2,container,anchor)
+                    processComponent(n1,n2,container,anchor,parentComponent)
                 }
         }
         // n1.shapeFlag区分

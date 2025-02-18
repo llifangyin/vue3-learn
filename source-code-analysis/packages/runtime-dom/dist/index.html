@@ -7,8 +7,6 @@
 </head>
 <body>
     <div id="app">
-        <div id="root1"></div>
-        <div id="root2"></div>
     </div>
     <script type="module">
         // import { 
@@ -20,6 +18,8 @@
         //     Fragment,
         //     getCurrentInstance,
         //     Teleport,
+        //     provide,
+        //     inject
         // } from './vue.runtime.esm-browser.min.js'
 
         import {
@@ -28,13 +28,42 @@
             Text,
             Fragment,
             Teleport,
-            ref
+            ref,
+            provide,
+            inject,
          } from './runtime-dom.js'
-  
-        render(h(Teleport,{to:'#root2'},[1234,'abc']), app)
-         setTimeout(() => {
-              render(h(Teleport,{to:'#root2'},[1234,'5678']), app)
-         }, 1000);
+        const p1 = {
+            setup(){
+                const age = ref(10)
+                setTimeout(() => {
+                    age.value = 20
+                }, 1000);
+                provide('name','zhangsan')
+                provide('age',age)
+                return ()=>{
+                    return  h(p2)
+                }
+            }
+        }
+        const p2 = {
+            setup(){
+                return ()=>{
+                    return  h(p3)
+                }
+            }
+        }
+        const p3 = {
+            setup(){
+                const age = inject('age')
+                const name = inject('name')
+                return ()=>{
+                    return  h('div',{},[name,age.value])
+                }
+            }
+        }
+        // provide  父组件往子组件依次传递
+        render(h(p1), app)
+      
     </script>
 </body>
 </html>
