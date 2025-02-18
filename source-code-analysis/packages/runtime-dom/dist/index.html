@@ -6,7 +6,10 @@
     <title>vue3源码解析</title>
 </head>
 <body>
-    <div id="app"></div>
+    <div id="app">
+        <div id="root1"></div>
+        <div id="root2"></div>
+    </div>
     <script type="module">
         // import { 
         //     h,
@@ -15,7 +18,8 @@
         //     Text,
         //     ref,
         //     Fragment,
-        //     getCurrentInstance
+        //     getCurrentInstance,
+        //     Teleport,
         // } from './vue.runtime.esm-browser.min.js'
 
         import {
@@ -23,32 +27,14 @@
             render,
             Text,
             Fragment,
+            Teleport,
             ref
          } from './runtime-dom.js'
-         
-        const vueComponent = {
-            setup(props,{attrs,slots,emit,expose}){
-                expose({
-                    a:1
-                })
-                // const instance = getCurrentInstance()
-                // console.log(instance)
-                return (proxy)=>{
-                    return h('button',
-                    {
-                        onClick:()=>
-                            emit('myEvent',100)
-                        
-                    },
-                    'click me')
-                }
-            }
-        }
-     
-        render(h(vueComponent,{onMyEvent:(val)=>{console.log(val)}}), app)
-        setTimeout(() => {
-        render(h(null,{onMyEvent:(val)=>{console.log(val)}}), app)
-    }, 1000);
+  
+        render(h(Teleport,{to:'#root2'},[1234,'abc']), app)
+         setTimeout(() => {
+              render(h(Teleport,{to:'#root2'},[1234,'5678']), app)
+         }, 1000);
     </script>
 </body>
 </html>

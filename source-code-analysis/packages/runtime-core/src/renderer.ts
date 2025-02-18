@@ -18,7 +18,7 @@ export function createRenderer(renderOptions) {
         nextSibling: hostNextSibling,
         patchProp: hostPatchProp
     } = renderOptions
-    const mountChildren = (children,container) => {
+    const mountChildren = (children,container,parentComponent?) => {
         for(let i = 0;i<children.length;i++){
             patch(null,children[i],container)
         }
@@ -406,9 +406,21 @@ export function createRenderer(renderOptions) {
             default:
                 if(shapeFlag & ShapeFlags.ELEMENT){
                     processElement(n1,n2,container,anchor)
+                }else if(shapeFlag & ShapeFlags.TELEPORT){
+                    type.process(n1,n2,container,anchor,  null,{
+                        mountChildren,
+                        patchChildren,
+                        move(vnode,container,anchor){
+                            hostInsert(
+                                vnode.component?vnode.component.subTree:vnode.el,
+                                container,
+                                null,//parentComponet
+                                anchor
+                            )
+                        }
+                    })
                 }else if(shapeFlag & ShapeFlags.COMPONENT){
                     // 组件 vue3中函数式组件废弃了，没有性能节约
-                    
                     processComponent(n1,n2,container,anchor)
                 }
         }
@@ -426,6 +438,10 @@ export function createRenderer(renderOptions) {
         }else if(shapeFlag & ShapeFlags.COMPONENT){
             // 组件
             unmount(vnode.component.subTree)
+
+        }else if(shapeFlag & ShapeFlags.TELEPORT){
+            // 传送门
+            vnode.type.remove(vnode,unmountChildren)
 
         } else{
             hostRemove(vnode.el)
