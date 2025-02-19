@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vue3源码解析</title>
+</head>
+<body>
+    <div id="app">
+    </div>
+    <script type="module">
+        // import { 
+        //     h,
+        //     createRenderer,
+        //     render,
+        //     Text,
+        //     ref,
+        //     Fragment,
+        //     getCurrentInstance,
+        //     Teleport,
+        //     provide,
+        //     inject
+        // } from './vue.runtime.esm-browser.min.js'
+
+        import {
+            h,
+            render,
+            Text,
+            Fragment,
+            Teleport,
+            ref,
+            provide,
+            inject,
+         } from './runtime-dom.js'
+        const p1 = {
+            setup(){
+                const age = ref(10)
+                setTimeout(() => {
+                    age.value = 20
+                }, 1000);
+                provide('name','zhangsan')
+                provide('age',age)
+                return ()=>{
+                    return  h(p2)
+                }
+            }
+        }
+        const p2 = {
+            setup(){
+                return ()=>{
+                    return  h(p3)
+                }
+            }
+        }
+        const p3 = {
+            setup(){
+                const age = inject('age')
+                const name = inject('name')
+                return ()=>{
+                    return  h('div',{},[name,age.value])
+                }
+            }
+        }
+        // provide  父组件往子组件依次传递
+        render(h(p1), app)
+      
+    </script>
+</body>
+</html>

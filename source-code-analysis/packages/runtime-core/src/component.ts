@@ -134,8 +134,9 @@ export function setupComponent(instance){
                 instance.exposed = value
             }
         }
+        setCurrentInstance(instance)//在setup里可以获取到当前实例
         const setupResult = setup(instance.props,setupContext)
-
+        unsetCurrentInstance()//setup执行完毕后清空
         if(isFunction(setupResult)){
             instance.render = setupResult
         }else{
@@ -161,3 +162,7 @@ export function setupComponent(instance){
 
 }
 
+export let currnetInstance = null
+export const getCurrentInstance = () => currentInstance
+export const setCurrentInstance = (instance) => currentInstance = instance
+export const unsetCurrentInstance = () => currentInstance = null

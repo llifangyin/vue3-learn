@@ -5,6 +5,7 @@ import { reactive, ReactiveEffect } from '@vue/reactivity';
 import { queueJob } from './scheduler';
 import { createComponentInstance, setupComponent } from './component';
 import { h } from './h';
+import { invokeHooks } from './apiLifecycle';
 export function createRenderer(renderOptions) {
     // core中不关心如何渲染,可跨平台
     const {
@@ -298,7 +299,12 @@ export function createRenderer(renderOptions) {
             // console.log(data(),'data')
             // 区分第一次创建和更新
             const {render} = instance
+            const {bm,m,bu,u} = instance
             if(!instance.isMounted){
+                // 如果有钩子，执行钩子
+                if(bm){
+                    invokeHooks(bm)
+                }
                 // console.log(render,'render')
                 //  可以被访问到的对象，props state attr
                 const subTree = render.call(instance.proxy,instance.proxy)//执行render函数
@@ -307,6 +313,9 @@ export function createRenderer(renderOptions) {
                 instance.subTree = subTree
                 patch(null,subTree,container,anchor,instance)
                 instance.isMounted = true
+                if(m){
+                    invokeHooks(m)
+                }
             }else{
                 // console.log(instance,'instance')
                 // 属性更新或状态更新
@@ -315,11 +324,17 @@ export function createRenderer(renderOptions) {
                     updateComponentPreRender(instance,instance.next,container)
 
                 }
+                if(bu){
+                    invokeHooks(bu)
+                }
                 // 基于状态的组件更新
                 const prev = instance.subTree
                 const next = render.call(instance.proxy,instance.proxy)
                 patch(prev,next,container,anchor,instance)
                 instance.subTree = next
+                if(u){
+                    invokeHooks(u)
+                }
             }
 
          }
