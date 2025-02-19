@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vue3源码解析</title>
+</head>
+<body>
+    <div id="app">
+    </div>
+    <script type="module">
+        // import { 
+        //     h,
+        //     createRenderer,
+        //     render,
+        //     Text,
+        //     ref,
+        //     Fragment,
+        //     getCurrentInstance,
+        //     Teleport,
+        //     provide,
+        //     inject,
+        //     onMounted,
+        //     onBeforeMount,
+        //     onBeforeUpdate,
+        //     onUpdated,
+        //     onBeforeUnmount,
+        // } from './vue.runtime.esm-browser.min.js'
+
+        import {
+            h,
+            render,
+            Text,
+            Fragment,
+            Teleport,
+            ref,
+            provide,
+            inject,
+            onMounted,
+            onBeforeMount,
+            onBeforeUpdate,
+            onUpdated,
+            onBeforeUnmount,
+            getCurrentInstance,
+         } from './runtime-dom.js'
+        const myComponent = {
+            props:{
+                value:{
+                    type:String,
+                    default:''
+                }
+            },
+            setup(props,{attrs,emit,slots,expose}){
+                console.log(' child setup')
+                // console.log(getCurrentInstance(),'child getCurrentInstance')
+                onMounted(() => {
+                    console.log('child onMounted')
+                    // 子组件执行完 会赋为null 
+                    // setupRenderEffect 方法中会重置实例为null
+                    // 解决方式，调用钩子时，先保存实例
+                    console.log(getCurrentInstance(),'xxxx bug')
+                })
+                onBeforeMount(() => {
+                    console.log('child onBeforeMount')
+                })
+                onBeforeUpdate(() => {
+                    console.log('child onBeforeUpdate')
+                })
+                onUpdated(() => {
+                    console.log('child onUpdated')
+                })
+                onBeforeUnmount(() => {
+                    console.log('child onBeforeUnmount')
+                })
+                return ()=>{
+                    return  h('div',{},[props.value])
+                }
+            }
+        }
+        const vueComponemt = {
+            setup(props,{attrs,emit,slots,expose}){
+                // setup类似于 beforeCreate created
+                console.log(' parent setup')
+                // console.log(getCurrentInstance(),'parent getCurrentInstance')
+                onMounted(() => {
+                    console.log(' parent onMounted')
+                })
+                onBeforeMount(() => {
+                    console.log('parent onBeforeMount')
+                })
+                onBeforeUpdate(() => {
+                    console.log('parent onBeforeUpdate')
+                })
+                onUpdated(() => {
+                    console.log('parent onUpdated')
+                })
+                onBeforeUnmount(() => {
+                    console.log('parent onBeforeUnmount')
+                })
+                console.log('setup 333 beforecreate');
+                
+                const age = ref(10)
+                setTimeout(() => {
+                    age.value = 20
+                }, 1000);
+                return ()=>{
+                    return  h(myComponent,{value:age.value})
+                }
+            }
+        }
+        render(h(vueComponemt), app)
+      
+    </script>
+</body>
+</html>

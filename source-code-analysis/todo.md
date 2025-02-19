@@ -5,7 +5,7 @@
 - [x] L41 teleport实现
 - [x] L42 provide inject实现
 - [ ] L43 函数式组件原理
-- [ ] L44 ref实现原理
+- [x] L44 ref实现原理
 - [x] L45 生命周期原理
 - [ ] L46 keep-alive
 - [ ] L47 transition 1 2 3

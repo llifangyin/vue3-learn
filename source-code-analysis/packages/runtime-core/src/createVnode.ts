@@ -26,7 +26,8 @@ export function createVNode(type, props, children?) {
         children,
         key: props?.key,//for diff
         el: null,//真实节点
-        shapeFlag
+        shapeFlag,
+        ref:props?.ref,
     }
     if(children){
         if(Array.isArray(children)){

@@ -16,6 +16,7 @@ export function createHook(type){
         //    组件中运行的 有示例
        if(target){
         // bm:[hook1,hook2]
+        // 类似于依赖收集，每个钩子都会收集对应的实例/
         const hooks =  target[type] ||( target[type] = [])
         // 让currentInstance 存储到当前的钩子上
         const wrapHook = ()=>{

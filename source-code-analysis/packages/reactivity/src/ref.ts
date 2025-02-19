@@ -32,7 +32,7 @@ class RefImpl{
 export function trackRefValue(ref){
 
     if(activeEffect){
-        console.log(activeEffect,'收集依赖 trackRefValue');
+        // console.log(activeEffect,'收集依赖 trackRefValue');
        trackEffect(activeEffect,
         ref.dep = ref.dep || createDep(() => ref.dep = undefined ,'undefined')
        )

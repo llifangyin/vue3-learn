@@ -170,7 +170,8 @@ function createVNode(type, props, children) {
     //for diff
     el: null,
     //真实节点
-    shapeFlag
+    shapeFlag,
+    ref: props?.ref
   };
   if (children) {
     if (Array.isArray(children)) {
@@ -480,7 +481,6 @@ var RefImpl = class {
 };
 function trackRefValue(ref2) {
   if (activeEffect) {
-    console.log(activeEffect, "\u6536\u96C6\u4F9D\u8D56 trackRefValue");
     trackEffect(
       activeEffect,
       ref2.dep = ref2.dep || createDep(() => ref2.dep = void 0, "undefined")
@@ -1163,7 +1163,7 @@ function createRenderer(renderOptions2) {
       unmount(n1);
       n1 = null;
     }
-    const { type, shapeFlag } = n2;
+    const { type, shapeFlag, ref: ref2 } = n2;
     switch (type) {
       case Text:
         processText(n1, n2, container);
@@ -1192,7 +1192,16 @@ function createRenderer(renderOptions2) {
           processComponent(n1, n2, container, anchor, parentComponent);
         }
     }
+    if (ref2 != null) {
+      setRef(ref2, n2);
+    }
   };
+  function setRef(rawRef, vnode) {
+    let value = vnode.shapeFlag & 4 /* STATEFUL_COMPONENT */ ? vnode.component.exposed || vnode.component.proxy : vnode.el;
+    if (isRef(rawRef)) {
+      rawRef.value = value;
+    }
+  }
   const unmount = (vnode) => {
     const { shapeFlag } = vnode;
     if (vnode.type == Fragment) {
