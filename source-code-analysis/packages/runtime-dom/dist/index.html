@@ -43,38 +43,11 @@
             onBeforeUnmount,
             getCurrentInstance,
          } from './runtime-dom.js'
-        const myComponent = {
-            props:{
-                value:{
-                    type:Number,
-                }
-            },
-            setup(props,{attrs,emit,slots,expose}){
-                // expose({value:500})
-                return ()=>{
-                    return  h('div',{},[props.value])
-                }
-            }
-        }
-        const vueComponemt = {
-            setup(props,{attrs,emit,slots,expose}){
-                const age = ref(10)
-                const comp = ref(null)
-                onMounted(()=>{
-                    // ref属性的值
-                    // 如果当前组件有expose属性，那么则是expose属性的值
-                    //  如果当前组件无expose,获取的是组件的实例
-                    // 如果放到dom元素上，那么则是dom元素
-                    console.log(comp.value,'mounted')
-                })
-                return ()=>{
-                    return  h(myComponent,{value:age.value,ref:comp})
-                    // return  h('div',{value:age.value,ref:comp})
-
-                }
-            }
-        }
-        render(h(vueComponemt), app)
+        
+         function functionalComponent(props) {
+            return h('div', null, props.a + props.b)
+         }
+        render(h(functionalComponent,{a:1,b:2}), app)
       
     </script>
 </body>

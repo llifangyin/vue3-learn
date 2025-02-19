@@ -293,6 +293,23 @@ export function createRenderer(renderOptions) {
         updateProps(instance,instance.props,nextVNode.props)
     }
 
+    function renderComponent(instance) {
+        // console.log(instance,'instance')
+        // 
+        const {render,vnode,proxy,props,attrs} = instance
+        console.log(props,attrs,'props attrs')
+        // props {}   attrs:{xxx} 函数式组件没有props，属性传递给attrs
+        if(vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT){
+            // 有状态组件
+          return render.call(proxy,proxy)
+        }else{
+            // 函数式组件
+            // vue3中无性能优化，不推荐使用
+            console.log(vnode,'vnode')
+            return  vnode.type(attrs)
+        }
+        
+    }
     // 给组件创建一个ReactiveEffect
     function  setupRenderEffect(instance,container,anchor,parentComponent) {
         const componentUpdateFn = ()=>{
@@ -307,7 +324,9 @@ export function createRenderer(renderOptions) {
                 }
                 // console.log(render,'render')
                 //  可以被访问到的对象，props state attr
-                const subTree = render.call(instance.proxy,instance.proxy)//执行render函数
+
+                // const subTree = render.call(instance.proxy,instance.proxy)//执行render函数
+                const subTree = renderComponent(instance)
                 // 第一个state是this 第二个是参数
                 // subTree  return h(xxx)是个虚拟节点 即要渲染的虚拟节点
                 instance.subTree = subTree
@@ -328,10 +347,12 @@ export function createRenderer(renderOptions) {
                     invokeHooks(bu)
                 }
                 // 基于状态的组件更新
-                const prev = instance.subTree
-                const next = render.call(instance.proxy,instance.proxy)
-                patch(prev,next,container,anchor,instance)
-                instance.subTree = next
+                // const subTree = render.call(instance.proxy,instance.proxy)
+                const subTree = renderComponent(instance)
+                patch(instance.subTree,subTree,container,anchor,instance)
+                instance.subTree = subTree
+
+                // update
                 if(u){
                     invokeHooks(u)
                 }

@@ -1,5 +1,5 @@
 import { isTeleport } from "./Teleport";
-import { isObject, isString, ShapeFlags } from "@vue/shared";
+import { isFunction, isObject, isString, ShapeFlags } from "@vue/shared";
 export function isVnode(vnode){
     return vnode.__v_isVNode
 }
@@ -17,8 +17,10 @@ export function createVNode(type, props, children?) {
     :isTeleport(type)
     ?ShapeFlags.TELEPORT//传送门
     :isObject(type) 
-    ?ShapeFlags.STATEFUL_COMPONENT://有状态组件
-     0;
+    ?ShapeFlags.STATEFUL_COMPONENT//有状态组件
+    :isFunction(type)
+    ?ShapeFlags.FUNCTIONAL_COMPONENT//函数式组件
+    :0;
     const vnode = {
         __v_isVNode: true,
         type,

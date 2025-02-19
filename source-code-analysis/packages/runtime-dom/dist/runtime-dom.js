@@ -157,10 +157,7 @@ function isVnode(vnode) {
 var Text = Symbol("Text");
 var Fragment = Symbol("Fragment");
 function createVNode(type, props, children) {
-  const shapeFlag = isString(type) ? 1 /* ELEMENT */ : isTeleport(type) ? 64 /* TELEPORT */ : isObject(type) ? 4 /* STATEFUL_COMPONENT */ : (
-    //有状态组件
-    0
-  );
+  const shapeFlag = isString(type) ? 1 /* ELEMENT */ : isTeleport(type) ? 64 /* TELEPORT */ : isObject(type) ? 4 /* STATEFUL_COMPONENT */ : isFunction(type) ? 2 /* FUNCTIONAL_COMPONENT */ : 0;
   const vnode = {
     __v_isVNode: true,
     type,
@@ -1072,6 +1069,16 @@ function createRenderer(renderOptions2) {
     instance.vnode = nextVNode;
     updateProps(instance, instance.props, nextVNode.props);
   };
+  function renderComponent(instance) {
+    const { render: render3, vnode, proxy, props, attrs } = instance;
+    console.log(props, attrs, "props attrs");
+    if (vnode.shapeFlag & 4 /* STATEFUL_COMPONENT */) {
+      return render3.call(proxy, proxy);
+    } else {
+      console.log(vnode, "vnode");
+      return vnode.type(attrs);
+    }
+  }
   function setupRenderEffect(instance, container, anchor, parentComponent) {
     const componentUpdateFn = () => {
       const { render: render3 } = instance;
@@ -1080,7 +1087,7 @@ function createRenderer(renderOptions2) {
         if (bm) {
           invokeHooks(bm);
         }
-        const subTree = render3.call(instance.proxy, instance.proxy);
+        const subTree = renderComponent(instance);
         instance.subTree = subTree;
         patch(null, subTree, container, anchor, instance);
         instance.isMounted = true;
@@ -1094,10 +1101,9 @@ function createRenderer(renderOptions2) {
         if (bu) {
           invokeHooks(bu);
         }
-        const prev = instance.subTree;
-        const next = render3.call(instance.proxy, instance.proxy);
-        patch(prev, next, container, anchor, instance);
-        instance.subTree = next;
+        const subTree = renderComponent(instance);
+        patch(instance.subTree, subTree, container, anchor, instance);
+        instance.subTree = subTree;
         if (u) {
           invokeHooks(u);
         }

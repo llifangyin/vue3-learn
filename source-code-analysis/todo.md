@@ -4,7 +4,7 @@
 - [x] L40 组件emit 以及卸载
 - [x] L41 teleport实现
 - [x] L42 provide inject实现
-- [ ] L43 函数式组件原理
+- [x] L43 函数式组件原理
 - [x] L44 ref实现原理
 - [x] L45 生命周期原理
 - [ ] L46 keep-alive
