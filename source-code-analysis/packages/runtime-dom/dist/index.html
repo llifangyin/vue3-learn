@@ -25,6 +25,7 @@
         //     onBeforeUpdate,
         //     onUpdated,
         //     onBeforeUnmount,
+        //     KeepAlive,
         // } from './vue.runtime.esm-browser.min.js'
 
         import {
@@ -42,12 +43,78 @@
             onUpdated,
             onBeforeUnmount,
             getCurrentInstance,
+            KeepAlive
          } from './runtime-dom.js'
-        
-         function functionalComponent(props) {
-            return h('div', null, props.a + props.b)
+
+        // keepalive 缓存后不会重新渲染，而是会用原来的dom元素
+        // 组件不会被卸载，而是将dom移除
+        // 内部需要缓存dom
+        // keepalive使用类似插槽  render(xxx,null,{xxx})
+        //h(KeepAlive,null,{
+        //         default:()=>h(a1),
+        //     })
+         const maxProps = {
+            max:1
          }
-        render(h(functionalComponent,{a:1,b:2}), app)
+        const a1 = {
+            setup(){
+                onMounted(()=>{
+                    console.log('a1 onMounted')
+                })
+              
+                // console.log('a1 setup')
+                return ()=>{
+                    return h('h1',null,'a1')
+                }
+            }
+        }
+          const a2 = {
+              setup(){
+                onMounted(()=>{
+                    console.log('a2 onMounted')
+                })
+              
+                return ()=>{
+                    return h('h1',null,'a2')
+                }
+            }
+        }
+        const a3 = {
+            setup(){
+                onMounted(()=>{
+                    console.log('a3 onMounted')
+                })
+              
+                return ()=>{
+                    return h('h1',null,'a3')
+                }
+            }
+        }
+        render(h(KeepAlive,maxProps,{
+            default:()=>h(a1,{key:'a1'}),
+        }), app)
+
+        setTimeout(() => {
+            render(h(KeepAlive,maxProps,{
+                default:()=>h(a2,{key:'a2'}),
+            }), app)
+        }, 1000);
+        
+        setTimeout(() => {
+            render(h(KeepAlive,maxProps,{
+                default:()=>h(a1,{key:'a1'}),
+            }), app)
+        }, 2000);
+        setTimeout(() => {
+            render(h(KeepAlive,maxProps,{
+                default:()=>h(a3,{key:'a3'}),
+            }), app)
+        }, 3000);
+        setTimeout(() => {
+            render(h(KeepAlive,maxProps,{
+                default:()=>h(a2,{key:'a2'}),
+            }), app)
+        }, 4000);
       
     </script>
 </body>

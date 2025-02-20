@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>source-code-analysis</title>
+</head>
+<body>
+    <div id="app">
+    </div>
+    <script type="module">
+        // import { 
+        //     h,
+        //     createRenderer,
+        //     render,
+        //     Text,
+        //     ref,
+        //     Fragment,
+        //     getCurrentInstance,
+        //     Teleport,
+        //     provide,
+        //     inject,
+        //     onMounted,
+        //     onBeforeMount,
+        //     onBeforeUpdate,
+        //     onUpdated,
+        //     onBeforeUnmount,
+        // } from './vue.runtime.esm-browser.min.js'
+
+        import {
+            h,
+            render,
+            Text,
+            Fragment,
+            Teleport,
+            ref,
+            provide,
+            inject,
+            onMounted,
+            onBeforeMount,
+            onBeforeUpdate,
+            onUpdated,
+            onBeforeUnmount,
+            getCurrentInstance,
+         } from './runtime-dom.js'
+        
+         function functionalComponent(props) {
+            return h('div', null, props.a + props.b)
+         }
+        render(h(functionalComponent,{a:1,b:2}), app)
+      
+    </script>
+</body>
+</html>

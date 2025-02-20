@@ -7,7 +7,9 @@ export enum ShapeFlags {
     SLOTS_CHILDREN = 1 << 5,
     TELEPORT = 1 << 6,
     SUSPENSE = 1 << 7,
-    COMPONENT = ShapeFlags.STATEFUL_COMPONENT | ShapeFlags.FUNCTIONAL_COMPONENT
+    COMPONENT = ShapeFlags.STATEFUL_COMPONENT | ShapeFlags.FUNCTIONAL_COMPONENT,
+    COMPONENT_KEPT_ALIVE = 1 << 8, // 256
+    COMPONENT_SHOULD_KEEP_ALIVE = 1 << 9 // 512
 }
 // 对上述代码的解释:
 // ShapeFlags是一个枚举类型,定义了一些常量,用于表示虚拟节点的类型
