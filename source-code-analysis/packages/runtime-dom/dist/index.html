@@ -37,6 +37,7 @@
         //     onBeforeUnmount,
         //     KeepAlive,
         //     Transition,
+        //     defineAsyncComponent
         // } from './vue.runtime.esm-browser.min.js'
 
         import {
@@ -55,50 +56,58 @@
             onBeforeUnmount,
             getCurrentInstance,
             KeepAlive,
-            Transition
+            Transition,
+            defineAsyncComponent
          } from './runtime-dom.js'
 
-        // Transitions是函数式组件
-  
-        const props = {
-            name:'x',
-            onBeforeEnter(el){
-                console.log('onBeforeEnter',el)
+    const comp =   import ("./asyncComp.js")
+    const index = 2
+    let i = 0
+      const myComponent = defineAsyncComponent(
+        {
+            loader:()=>{
+                // return comp
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        console.log(i,'i==')
+                        if(i++ == 2){
+                            resolve({
+                                 render() {
+                                    return h('div', 'hello')
+                                }
+                            })
+                        }else{
+                            reject({
+                                render() {
+                                    return h('div', 'hello')
+                                }
+                            })
+                        }
+                    }, 3000);
+                })
             },
-            onEnter(el){
-                console.log('onEnter',el)
+            timeout:1000,
+            errorComponent:{
+                render(){
+                    return h('div', 'error ~~')
+                }
             },
-            onLeave(el){
-                console.log('onLeave',el)
+            delay:500,
+            loadingComponent:{
+                render:()=>{
+                    return h('div', 'loading ~~')
+                }
             },
-        }
-      
-        render(h(Transition,props,{
-            a:1,
-            default:()=>h('div',{
-                    style:{
-                        width:'100px',
-                        height:'100px',
-                        background:'red'
-                    }
-                },'hello red')
-        }), app)
-        setTimeout(() => {
-            render(h(Transition,props,{
-                b:2,
-                default:()=>h('div',{
-                    style:{
-                        width:'100px',
-                        height:'100px',
-                        color:'white',
-                        background:'blue'
-                    }
-                },'hello blue')
-            }), app)
-        }, 2000);
-        // setTimeout(() => {
-        //     render(null, app)
-        // }, 3000);
+            onError(err,retry,fail,idx){
+                // console.log(err,retry,fail,i, '===')
+                setTimeout(() => {
+                    retry()
+                    console.log('重新加载中~~');
+                }, 1000);
+            }
+        })
+        render(h(myComponent,), app)
+   
     </script>
 </body>
 </html>

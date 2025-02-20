@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>source-code-analysis</title>
+</head>
+<body>
+    <div id="app">
+    </div>
+    <style>
+        /* enterFrom  enterActive enterTo */
+        /* leaveFrom leaveActive LeaveTo */
+        .x-enter-active, .x-leave-active {
+            transition: opacity 1s ease-in-out;
+        }
+        .x-enter-from, .x-leave-to {
+            opacity: 0;
+        }
+    </style>
+    <script type="module">
+        // import { 
+        //     h,
+        //     createRenderer,
+        //     render,
+        //     Text,
+        //     ref,
+        //     Fragment,
+        //     getCurrentInstance,
+        //     Teleport,
+        //     provide,
+        //     inject,
+        //     onMounted,
+        //     onBeforeMount,
+        //     onBeforeUpdate,
+        //     onUpdated,
+        //     onBeforeUnmount,
+        //     KeepAlive,
+        //     Transition,
+        // } from './vue.runtime.esm-browser.min.js'
+
+        import {
+            h,
+            render,
+            Text,
+            Fragment,
+            Teleport,
+            ref,
+            provide,
+            inject,
+            onMounted,
+            onBeforeMount,
+            onBeforeUpdate,
+            onUpdated,
+            onBeforeUnmount,
+            getCurrentInstance,
+            KeepAlive,
+            Transition
+         } from './runtime-dom.js'
+
+        // Transitions是函数式组件
+  
+        const props = {
+            name:'x',
+            onBeforeEnter(el){
+                console.log('onBeforeEnter',el)
+            },
+            onEnter(el){
+                console.log('onEnter',el)
+            },
+            onLeave(el){
+                console.log('onLeave',el)
+            },
+        }
+      
+        render(h(Transition,props,{
+            a:1,
+            default:()=>h('div',{
+                    style:{
+                        width:'100px',
+                        height:'100px',
+                        background:'red'
+                    }
+                },'hello red')
+        }), app)
+        setTimeout(() => {
+            render(h(Transition,props,{
+                b:2,
+                default:()=>h('div',{
+                    style:{
+                        width:'100px',
+                        height:'100px',
+                        color:'white',
+                        background:'blue'
+                    }
+                },'hello blue')
+            }), app)
+        }, 2000);
+        // setTimeout(() => {
+        //     render(null, app)
+        // }, 3000);
+    </script>
+</body>
+</html>
