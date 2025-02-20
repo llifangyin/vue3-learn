@@ -121,7 +121,7 @@ function isString(value) {
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var hasOwn = (val, key) => hasOwnProperty.call(val, key);
 
-// packages/runtime-core/src/Teleport.ts
+// packages/runtime-core/src/components/Teleport.ts
 var Teleport = {
   __isTeleport: true,
   remove(vnode, unmountChildren) {
@@ -931,7 +931,7 @@ function createRenderer(renderOptions2) {
     }
   };
   const mountElement = (vnode, container, anchor, parentComponent) => {
-    const { type, props, children, shapeFlag } = vnode;
+    const { type, props, children, shapeFlag, transition } = vnode;
     const el = vnode.el = hostCreateElement(type);
     if (props) {
       for (const key in props) {
@@ -943,7 +943,13 @@ function createRenderer(renderOptions2) {
     } else if (shapeFlag & 16 /* ARRAY_CHILDREN */) {
       mountChildren(children, el, parentComponent);
     }
+    if (transition) {
+      transition.beforeEnter(el);
+    }
     hostInsert(el, container, anchor);
+    if (transition) {
+      transition.enter(el);
+    }
   };
   const processElement = (n1, n2, container, anchor, parentComponent) => {
     if (n1 == null) {
@@ -1048,7 +1054,12 @@ function createRenderer(renderOptions2) {
   };
   const patchChildren = (n1, n2, el, parentComponent) => {
     const c1 = n1.children;
-    const c2 = normalize(n2.children);
+    let c2;
+    if (typeof n2.children == "string" || typeof n2.children == "number") {
+      c2 = n2.children;
+    } else if (Array.isArray(n2.children)) {
+      c2 = normalize(n2.children);
+    }
     const prevShapeFlag = n1.shapeFlag;
     const shapeFlag = n2.shapeFlag;
     if (shapeFlag & 8 /* TEXT_CHILDREN */) {
@@ -1119,12 +1130,11 @@ function createRenderer(renderOptions2) {
     Object.assign(instance.slots, nextVNode.children);
   };
   function renderComponent(instance) {
-    const { render: render3, vnode, proxy, props, attrs } = instance;
+    const { render: render3, vnode, proxy, props, attrs, slots } = instance;
     if (vnode.shapeFlag & 4 /* STATEFUL_COMPONENT */) {
       return render3.call(proxy, proxy);
     } else {
-      console.log(vnode, "vnode");
-      return vnode.type(attrs);
+      return vnode.type(attrs, { slots });
     }
   }
   function setupRenderEffect(instance, container, anchor, parentComponent) {
@@ -1272,7 +1282,7 @@ function createRenderer(renderOptions2) {
     }
   }
   const unmount = (vnode, parentComponent) => {
-    const { shapeFlag } = vnode;
+    const { shapeFlag, transition, el } = vnode;
     const performRemove = () => {
       hostRemove(vnode.el);
     };
@@ -1285,7 +1295,11 @@ function createRenderer(renderOptions2) {
     } else if (shapeFlag & 64 /* TELEPORT */) {
       vnode.type.remove(vnode, unmountChildren);
     } else {
-      performRemove();
+      if (transition) {
+        transition.leave(el, performRemove);
+      } else {
+        performRemove();
+      }
     }
   };
   const render2 = (vnode, container) => {
@@ -1329,6 +1343,90 @@ function inject(key, defaultValue) {
   }
 }
 
+// packages/runtime-core/src/components/Transition.ts
+var nextFrame = (fn) => {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(fn);
+  });
+};
+function resolveTransitionProps(props) {
+  const {
+    name = "v",
+    enterFromClass = `${name}-enter-from`,
+    enterActiveClass = `${name}-enter-active`,
+    enterToClass = `${name}-enter-to`,
+    leaveFromClass = `${name}-leave-from`,
+    leaveActiveClass = `${name}-leave-active`,
+    leaveToClass = `${name}-leave-to`,
+    onBeforeEnter,
+    onEnter,
+    onLeave
+  } = props;
+  return {
+    onBeforeEnter(el) {
+      onBeforeEnter && onBeforeEnter(el);
+      el.classList.add(enterFromClass);
+      el.classList.add(enterActiveClass);
+    },
+    onEnter(el, done) {
+      const resolve = () => {
+        el.classList.remove(enterActiveClass);
+        el.classList.remove(enterToClass);
+        done && done();
+      };
+      onEnter && onEnter(el, resolve);
+      nextFrame(() => {
+        el.classList.remove(enterFromClass);
+        el.classList.add(enterToClass);
+        if (!onEnter || onEnter.length < 2) {
+          el.addEventListener("transitionEnd", resolve);
+        }
+      });
+    },
+    onLeave(el, done) {
+      onLeave && onLeave(el);
+      const resolve = () => {
+        el.classList.remove(leaveActiveClass);
+        el.classList.remove(leaveToClass);
+        done && done();
+      };
+      el.classList.add(leaveFromClass);
+      document.body.offsetHeight;
+      el.classList.add(leaveActiveClass);
+      nextFrame(() => {
+        el.classList.remove(leaveToClass);
+        el.classList.add(leaveToClass);
+        if (!onLeave || onLeave.length < 2) {
+          el.addEventListener("transitionEnd", resolve);
+        }
+      });
+    }
+  };
+}
+function Transition(props, { slots }) {
+  const propsWithHooks = resolveTransitionProps(props);
+  return h(baseTransitionImpl, propsWithHooks, slots);
+}
+var baseTransitionImpl = {
+  props: {
+    onBeforeEnter: Function,
+    onEnter: Function,
+    onLeave: Function
+  },
+  setup(props, { slots }) {
+    return () => {
+      const vnode = slots.default && slots.default();
+      if (!vnode) return;
+      vnode.transition = {
+        beforeEnter: props.onBeforeEnter,
+        enter: props.onEnter,
+        leave: props.onLeave
+      };
+      return vnode;
+    };
+  }
+};
+
 // packages/runtime-dom/src/index.ts
 var renderOptions = Object.assign({ patchProp }, nodeOps);
 var render = (vnode, container) => {
@@ -1341,6 +1439,7 @@ export {
   ReactiveEffect,
   Teleport,
   Text,
+  Transition,
   activeEffect,
   computed,
   createComponentInstance,
@@ -1370,6 +1469,7 @@ export {
   reactive,
   ref,
   render,
+  resolveTransitionProps,
   setCurrentInstance,
   setupComponent,
   toReactive,

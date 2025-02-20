@@ -35,7 +35,7 @@ export function createRenderer(renderOptions) {
         }
     }
     const mountElement = (vnode,container,anchor,parentComponent) => {
-        const {type,props,children,shapeFlag} = vnode
+        const {type,props,children,shapeFlag,transition} = vnode
         // ShapeFlags通过位运算判断节点类型
         // 第一次渲染时 虚拟节点和真实节点创建关联
         // 第二次再次渲染，通过虚拟节点找到真实节点，再次更新真实节点
@@ -54,7 +54,15 @@ export function createRenderer(renderOptions) {
             mountChildren(children,el,parentComponent)
         }
 
+        if(transition){
+            transition.beforeEnter(el)
+        }
+
         hostInsert(el,container,anchor)
+
+        if(transition){
+            transition.enter(el)
+        }
     }
     // 处理虚拟节点
     const processElement = (n1,n2,container,anchor,parentComponent) => {
@@ -204,7 +212,12 @@ export function createRenderer(renderOptions) {
    
     const patchChildren = (n1,n2,el,parentComponent) => {
         const c1 = n1.children
-        const  c2 = normalize (n2.children)
+        let c2;
+        if(typeof n2.children == 'string' || typeof  n2.children == 'number'){
+            c2 = n2.children
+        }else if(Array.isArray(n2.children)){
+            c2 = normalize (n2.children)
+        }
 
         const prevShapeFlag = n1.shapeFlag
         const shapeFlag = n2.shapeFlag
@@ -300,7 +313,7 @@ export function createRenderer(renderOptions) {
     function renderComponent(instance) {
         // console.log(instance,'instance')
         // 
-        const {render,vnode,proxy,props,attrs} = instance
+        const {render,vnode,proxy,props,attrs,slots} = instance
         // console.log(props,attrs,'props attrs')
         // props {}   attrs:{xxx} 函数式组件没有props，属性传递给attrs
         if(vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT){
@@ -309,8 +322,8 @@ export function createRenderer(renderOptions) {
         }else{
             // 函数式组件
             // vue3中无性能优化，不推荐使用
-            console.log(vnode,'vnode')
-            return  vnode.type(attrs)
+            // console.log(vnode,'vnode')
+            return  vnode.type(attrs,{slots})
         }
         
     }
@@ -511,7 +524,7 @@ export function createRenderer(renderOptions) {
         }
     }
     const unmount = (vnode,parentComponent) => {
-        const {shapeFlag} = vnode
+        const {shapeFlag,transition,el} = vnode
         const performRemove = () => {
             hostRemove(vnode.el)
         }
@@ -529,7 +542,12 @@ export function createRenderer(renderOptions) {
             // 传送门
             vnode.type.remove(vnode,unmountChildren)
         } else{
-           performRemove()
+            if(transition){
+                transition.leave(el,performRemove)
+            }else{
+                performRemove()
+            }
+
         }
     }
     // 多次调用进行虚拟节点比较 再渲染

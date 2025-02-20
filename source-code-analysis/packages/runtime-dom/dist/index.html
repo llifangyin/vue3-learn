@@ -8,6 +8,16 @@
 <body>
     <div id="app">
     </div>
+    <style>
+        /* enterFrom  enterActive enterTo */
+        /* leaveFrom leaveActive LeaveTo */
+        .x-enter-active, .x-leave-active {
+            transition: opacity 1s ease-in-out;
+        }
+        .x-enter-from, .x-leave-to {
+            opacity: 0;
+        }
+    </style>
     <script type="module">
         // import { 
         //     h,
@@ -26,6 +36,7 @@
         //     onUpdated,
         //     onBeforeUnmount,
         //     KeepAlive,
+        //     Transition,
         // } from './vue.runtime.esm-browser.min.js'
 
         import {
@@ -43,79 +54,51 @@
             onUpdated,
             onBeforeUnmount,
             getCurrentInstance,
-            KeepAlive
+            KeepAlive,
+            Transition
          } from './runtime-dom.js'
 
-        // keepalive 缓存后不会重新渲染，而是会用原来的dom元素
-        // 组件不会被卸载，而是将dom移除
-        // 内部需要缓存dom
-        // keepalive使用类似插槽  render(xxx,null,{xxx})
-        //h(KeepAlive,null,{
-        //         default:()=>h(a1),
-        //     })
-         const maxProps = {
-            max:1
-         }
-        const a1 = {
-            setup(){
-                onMounted(()=>{
-                    console.log('a1 onMounted')
-                })
-              
-                // console.log('a1 setup')
-                return ()=>{
-                    return h('h1',null,'a1')
-                }
-            }
+        // Transitions是函数式组件
+  
+        const props = {
+            name:'x',
+            onBeforeEnter(el){
+                console.log('onBeforeEnter',el)
+            },
+            onEnter(el){
+                console.log('onEnter',el)
+            },
+            onLeave(el){
+                console.log('onLeave',el)
+            },
         }
-          const a2 = {
-              setup(){
-                onMounted(()=>{
-                    console.log('a2 onMounted')
-                })
-              
-                return ()=>{
-                    return h('h1',null,'a2')
-                }
-            }
-        }
-        const a3 = {
-            setup(){
-                onMounted(()=>{
-                    console.log('a3 onMounted')
-                })
-              
-                return ()=>{
-                    return h('h1',null,'a3')
-                }
-            }
-        }
-        render(h(KeepAlive,maxProps,{
-            default:()=>h(a1,{key:'a1'}),
+      
+        render(h(Transition,props,{
+            a:1,
+            default:()=>h('div',{
+                    style:{
+                        width:'100px',
+                        height:'100px',
+                        background:'red'
+                    }
+                },'hello red')
         }), app)
-
         setTimeout(() => {
-            render(h(KeepAlive,maxProps,{
-                default:()=>h(a2,{key:'a2'}),
-            }), app)
-        }, 1000);
-        
-        setTimeout(() => {
-            render(h(KeepAlive,maxProps,{
-                default:()=>h(a1,{key:'a1'}),
+            render(h(Transition,props,{
+                b:2,
+                default:()=>h('div',{
+                    style:{
+                        width:'100px',
+                        height:'100px',
+                        color:'white',
+                        background:'blue'
+                    }
+                },'hello blue')
             }), app)
         }, 2000);
-        setTimeout(() => {
-            render(h(KeepAlive,maxProps,{
-                default:()=>h(a3,{key:'a3'}),
-            }), app)
-        }, 3000);
-        setTimeout(() => {
-            render(h(KeepAlive,maxProps,{
-                default:()=>h(a2,{key:'a2'}),
-            }), app)
-        }, 4000);
-      
+        // setTimeout(() => {
+        //     render(null, app)
+        // }, 3000);
     </script>
 </body>
 </html>

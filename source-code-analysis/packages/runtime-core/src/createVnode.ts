@@ -1,4 +1,4 @@
-import { isTeleport } from "./Teleport";
+import { isTeleport } from "./components/Teleport";
 import { isFunction, isObject, isString, ShapeFlags } from "@vue/shared";
 export function isVnode(vnode){
     return vnode.__v_isVNode
