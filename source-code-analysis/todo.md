@@ -7,8 +7,8 @@
 - [x] L43 函数式组件原理
 - [x] L44 ref实现原理
 - [x] L45 生命周期原理
-- [ ] L46 keep-alive
-- [ ] L47 transition 1 2 3
+- [x] L46 keep-alive
+- [x] L47 transition 1 2 3
 - [ ] L48 异步组件
 - [ ] L49 编译优化
 - [ ] L50 靶向更新
