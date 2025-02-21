@@ -80,6 +80,17 @@
             },
             // 标识是模板编译时加的
             // 靶向更新：哪些节点有那些属性变化，只更新这些节点
+//        dynamicChildren     [
+//     {
+//         "__v_isVNode": true,
+//         "type": "span",
+//         "props": null,
+//         "children": "Vue",
+//         "el": {},
+//         "shapeFlag": 9,
+//         "patchFlag": 1
+//     }
+// ]
             render(_ctx) {
                 const vnode =  
                 (_openBlock(),
@@ -93,6 +104,7 @@
                         )
                 ]))
                 console.log(vnode, 'vnode');
+                
                 return vnode
             }
         }
