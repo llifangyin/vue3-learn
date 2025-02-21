@@ -1,4 +1,4 @@
-import { ShapeFlags ,hasOwn} from '@vue/shared';
+import { ShapeFlags ,hasOwn,PatchFlags} from '@vue/shared';
 import { isSameVnode,Text,Fragment} from './createVnode';
 import { getSequence } from './seq';
 import { isRef, reactive, ReactiveEffect } from '@vue/reactivity';
@@ -21,17 +21,19 @@ export function createRenderer(renderOptions) {
         patchProp: hostPatchProp
     } = renderOptions
     const normalize = (children) => {
-        for(let i = 0;i<children.length;i++){
-            if(typeof  children[i] == 'string' || typeof  children[i] == 'number'){
-                 children[i] = h(Text,null, String( children[i]))
+        if(Array.isArray(children)){
+            for(let i = 0;i<children.length;i++){
+                if(typeof  children[i] == 'string' || typeof  children[i] == 'number'){
+                     children[i] = h(Text,null, String( children[i]))
+                }
             }
         }
         return children
     }
-    const mountChildren = (children,container,parentComponent) => {
+    const mountChildren = (children,container,anchor,parentComponent) => {
         for(let i = 0;i<children.length;i++){
             normalize(children)
-            patch(null, children[i],container,parentComponent)
+            patch(null, children[i],container,anchor,parentComponent)
         }
     }
     const mountElement = (vnode,container,anchor,parentComponent) => {
@@ -51,7 +53,7 @@ export function createRenderer(renderOptions) {
             hostSetElementText(el,children)
         }else if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
             // 数组
-            mountChildren(children,el,parentComponent)
+            mountChildren(children,el,anchor,parentComponent)
         }
 
         if(transition){
@@ -70,7 +72,7 @@ export function createRenderer(renderOptions) {
             // 初始化
             mountElement(n2,container,anchor,parentComponent)
         }else{
-            patchElement(n1,n2,container,parentComponent)
+            patchElement(n1,n2,container,anchor,parentComponent)
         }
     }
     const patchProps = (el,oldProps,newProps) => {
@@ -210,14 +212,15 @@ export function createRenderer(renderOptions) {
         }
     }
    
-    const patchChildren = (n1,n2,el,parentComponent) => {
+    const patchChildren = (n1,n2,el,anchor,parentComponent) => {
         const c1 = n1.children
-        let c2;
-        if(typeof n2.children == 'string' || typeof  n2.children == 'number'){
-            c2 = n2.children
-        }else if(Array.isArray(n2.children)){
-            c2 = normalize (n2.children)
-        }
+        let     c2 = normalize (n2.children)
+        // bugfix校对
+        // if(typeof n2.children == 'string' || typeof  n2.children == 'number'){
+        //     c2 = n2.children
+        // }else if(Array.isArray(n2.children)){
+        //     c2 = normalize (n2.children)
+        // }
 
         const prevShapeFlag = n1.shapeFlag
         const shapeFlag = n2.shapeFlag
@@ -248,21 +251,65 @@ export function createRenderer(renderOptions) {
                 }
                 if(shapeFlag & ShapeFlags.ARRAY_CHILDREN){
                     // 新的是数组
-                    mountChildren(c2,el,parentComponent)
+                    mountChildren(c2,el,anchor,parentComponent)
                 }
             }
 
         }
     }
+    const patchBlockChildren = (n1,n2,container,anchor,parentComponent) => {
+        // 1. 递归比较新老儿子
+        // 2. 比较完成后，删除多余的
+        // 3. 更新不一样的
+        // 4. 新增的
+          for(let i = 0;i<n2.dynamicChildren.length;i++){
+            patch(
+                n1.dynamicChildren[i],
+                n2.dynamicChildren[i],
+                container,
+                anchor,
+                parentComponent
+            )
+          }
+
+    }
 
     // 比较新旧节点
-    const patchElement = (n1,n2,container,parentComponent) => {
+    const patchElement = (n1,n2,container,anchor,parentComponent) => {
         // 比较差异
         let el = n2.el = n1.el 
         let oldProps = n1.props || {}
         let newProps = n2.props || {}
-        patchProps(el,oldProps,newProps)
-        patchChildren(n1,n2,el,parentComponent)
+
+        // 比对时  针对某个属性进行比对
+        const {patchFlag,dynamicChildren} = n2
+        if(patchFlag){
+            if(patchFlag & PatchFlags.STYLE){
+
+            }
+            if(patchFlag & PatchFlags.PROPS){
+            }
+           
+            // ...
+        }else{
+            patchProps(el,oldProps,newProps)
+        }
+
+        if(patchFlag  & PatchFlags.TEXT){
+            // 动态儿子 只比较儿子
+            if(n1.children !== n2.children){
+               return  hostSetElementText(el,n2.children)
+            }
+        }
+
+        if(dynamicChildren){
+            // 线性比对
+            patchBlockChildren(n1,n2,el,anchor,parentComponent)
+        }else{
+            // 全量diff
+            patchChildren(n1,n2,el,anchor,parentComponent)
+
+        }
     }
     const processText = (n1,n2,container) => {
         if(n1 == null){
@@ -277,13 +324,13 @@ export function createRenderer(renderOptions) {
             }
         }
     }
-    const processFragment = (n1,n2,container,parentComponent) => {
+    const processFragment = (n1,n2,container,anchor,parentComponent) => {
         if(n1 == null){
             // 初始化
-            mountChildren(n2.children,container,parentComponent)
+            mountChildren(n2.children,container,anchor,parentComponent)
         }else{
             // 更新
-            patchChildren(n1,n2,container,parentComponent)
+            patchChildren(n1,n2,container,anchor,parentComponent)
         }
     }
     const updateProps = (instance,prevProps,nextProps) => {
@@ -483,7 +530,7 @@ export function createRenderer(renderOptions) {
                 processText(n1,n2,container)
                 break;
             case Fragment:
-                processFragment(n1,n2,container,parentComponent)
+                processFragment(n1,n2,container,anchor,parentComponent)
                 break;
             default:
                 // 元素

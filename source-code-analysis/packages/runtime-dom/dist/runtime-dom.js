@@ -156,7 +156,7 @@ function isVnode(vnode) {
 }
 var Text = Symbol("Text");
 var Fragment = Symbol("Fragment");
-function createVNode(type, props, children) {
+function createVNode(type, props, children, patchFlag) {
   const shapeFlag = isString(type) ? 1 /* ELEMENT */ : isTeleport(type) ? 64 /* TELEPORT */ : isObject(type) ? 4 /* STATEFUL_COMPONENT */ : isFunction(type) ? 2 /* FUNCTIONAL_COMPONENT */ : 0;
   const vnode = {
     __v_isVNode: true,
@@ -168,8 +168,12 @@ function createVNode(type, props, children) {
     el: null,
     //真实节点
     shapeFlag,
-    ref: props?.ref
+    ref: props?.ref,
+    patchFlag
   };
+  if (currentBlock && patchFlag > 0) {
+    currentBlock.push(vnode);
+  }
   if (children) {
     if (Array.isArray(children)) {
       vnode.shapeFlag |= 16 /* ARRAY_CHILDREN */;
@@ -184,6 +188,24 @@ function createVNode(type, props, children) {
 }
 function isSameVnode(n1, n2) {
   return n1.key === n2.key && n1.type === n2.type;
+}
+var currentBlock = null;
+function openBlock() {
+  currentBlock = [];
+}
+function closeBlock() {
+  currentBlock = null;
+}
+function setupBlock(vnode) {
+  vnode.dynamicChildren = currentBlock;
+  closeBlock();
+  return vnode;
+}
+function createElementBlock(type, props, children, patchFlag) {
+  return setupBlock(createVNode(type, props, children, patchFlag));
+}
+function toDisplayString(val) {
+  return val == null ? "" : isString(val) ? val : isObject(val) ? JSON.stringify(val) : String(val);
 }
 
 // packages/runtime-core/src/h.ts
@@ -917,17 +939,19 @@ function createRenderer(renderOptions2) {
     patchProp: hostPatchProp
   } = renderOptions2;
   const normalize = (children) => {
-    for (let i = 0; i < children.length; i++) {
-      if (typeof children[i] == "string" || typeof children[i] == "number") {
-        children[i] = h(Text, null, String(children[i]));
+    if (Array.isArray(children)) {
+      for (let i = 0; i < children.length; i++) {
+        if (typeof children[i] == "string" || typeof children[i] == "number") {
+          children[i] = h(Text, null, String(children[i]));
+        }
       }
     }
     return children;
   };
-  const mountChildren = (children, container, parentComponent) => {
+  const mountChildren = (children, container, anchor, parentComponent) => {
     for (let i = 0; i < children.length; i++) {
       normalize(children);
-      patch(null, children[i], container, parentComponent);
+      patch(null, children[i], container, anchor, parentComponent);
     }
   };
   const mountElement = (vnode, container, anchor, parentComponent) => {
@@ -941,7 +965,7 @@ function createRenderer(renderOptions2) {
     if (shapeFlag & 8 /* TEXT_CHILDREN */) {
       hostSetElementText(el, children);
     } else if (shapeFlag & 16 /* ARRAY_CHILDREN */) {
-      mountChildren(children, el, parentComponent);
+      mountChildren(children, el, anchor, parentComponent);
     }
     if (transition) {
       transition.beforeEnter(el);
@@ -955,7 +979,7 @@ function createRenderer(renderOptions2) {
     if (n1 == null) {
       mountElement(n2, container, anchor, parentComponent);
     } else {
-      patchElement(n1, n2, container, parentComponent);
+      patchElement(n1, n2, container, anchor, parentComponent);
     }
   };
   const patchProps = (el, oldProps, newProps) => {
@@ -1052,14 +1076,9 @@ function createRenderer(renderOptions2) {
       unmount(children[i], parentComponent);
     }
   };
-  const patchChildren = (n1, n2, el, parentComponent) => {
+  const patchChildren = (n1, n2, el, anchor, parentComponent) => {
     const c1 = n1.children;
-    let c2;
-    if (typeof n2.children == "string" || typeof n2.children == "number") {
-      c2 = n2.children;
-    } else if (Array.isArray(n2.children)) {
-      c2 = normalize(n2.children);
-    }
+    let c2 = normalize(n2.children);
     const prevShapeFlag = n1.shapeFlag;
     const shapeFlag = n2.shapeFlag;
     if (shapeFlag & 8 /* TEXT_CHILDREN */) {
@@ -1081,17 +1100,45 @@ function createRenderer(renderOptions2) {
           hostSetElementText(el, "");
         }
         if (shapeFlag & 16 /* ARRAY_CHILDREN */) {
-          mountChildren(c2, el, parentComponent);
+          mountChildren(c2, el, anchor, parentComponent);
         }
       }
     }
   };
-  const patchElement = (n1, n2, container, parentComponent) => {
+  const patchBlockChildren = (n1, n2, container, anchor, parentComponent) => {
+    for (let i = 0; i < n2.dynamicChildren.length; i++) {
+      patch(
+        n1.dynamicChildren[i],
+        n2.dynamicChildren[i],
+        container,
+        anchor,
+        parentComponent
+      );
+    }
+  };
+  const patchElement = (n1, n2, container, anchor, parentComponent) => {
     let el = n2.el = n1.el;
     let oldProps = n1.props || {};
     let newProps = n2.props || {};
-    patchProps(el, oldProps, newProps);
-    patchChildren(n1, n2, el, parentComponent);
+    const { patchFlag, dynamicChildren } = n2;
+    if (patchFlag) {
+      if (patchFlag & 4 /* STYLE */) {
+      }
+      if (patchFlag & 8 /* PROPS */) {
+      }
+    } else {
+      patchProps(el, oldProps, newProps);
+    }
+    if (patchFlag & 1 /* TEXT */) {
+      if (n1.children !== n2.children) {
+        return hostSetElementText(el, n2.children);
+      }
+    }
+    if (dynamicChildren) {
+      patchBlockChildren(n1, n2, el, anchor, parentComponent);
+    } else {
+      patchChildren(n1, n2, el, anchor, parentComponent);
+    }
   };
   const processText = (n1, n2, container) => {
     if (n1 == null) {
@@ -1104,11 +1151,11 @@ function createRenderer(renderOptions2) {
       }
     }
   };
-  const processFragment = (n1, n2, container, parentComponent) => {
+  const processFragment = (n1, n2, container, anchor, parentComponent) => {
     if (n1 == null) {
-      mountChildren(n2.children, container, parentComponent);
+      mountChildren(n2.children, container, anchor, parentComponent);
     } else {
-      patchChildren(n1, n2, container, parentComponent);
+      patchChildren(n1, n2, container, anchor, parentComponent);
     }
   };
   const updateProps = (instance, prevProps, nextProps) => {
@@ -1248,7 +1295,7 @@ function createRenderer(renderOptions2) {
         processText(n1, n2, container);
         break;
       case Fragment:
-        processFragment(n1, n2, container, parentComponent);
+        processFragment(n1, n2, container, anchor, parentComponent);
         break;
       default:
         if (shapeFlag & 1 /* ELEMENT */) {
@@ -1505,8 +1552,11 @@ export {
   Text,
   Transition,
   activeEffect,
+  closeBlock,
   computed,
   createComponentInstance,
+  createElementBlock,
+  createVNode as createElementVNode,
   createHook,
   createRenderer,
   createVNode,
@@ -1529,6 +1579,7 @@ export {
   onBeforeUpdate,
   onMounted,
   onUpdated,
+  openBlock,
   provide,
   proxyRefs,
   reactive,
@@ -1536,7 +1587,9 @@ export {
   render,
   resolveTransitionProps,
   setCurrentInstance,
+  setupBlock,
   setupComponent,
+  toDisplayString,
   toReactive,
   toRef,
   toRefs,

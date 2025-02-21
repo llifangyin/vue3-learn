@@ -19,6 +19,13 @@
         }
     </style>
     <script type="module">
+        // import {
+        //        render,
+        //        reactive,
+        //        toRefs,
+        //        h
+        // } from './vue.esm-browser.js'
+
         // import { 
         //     h,
         //     createRenderer,
@@ -41,73 +48,58 @@
         // } from './vue.runtime.esm-browser.min.js'
 
         import {
-            h,
             render,
             Text,
-            Fragment,
-            Teleport,
-            ref,
-            provide,
-            inject,
-            onMounted,
-            onBeforeMount,
-            onBeforeUpdate,
-            onUpdated,
-            onBeforeUnmount,
-            getCurrentInstance,
-            KeepAlive,
-            Transition,
-            defineAsyncComponent
+            reactive,
+            toRefs,
+            h,
+            createElementVNode as _createElementVNode,
+            toDisplayString as _toDisplayString,
+            openBlock as _openBlock,
+            createElementBlock as _createElementBlock,
          } from './runtime-dom.js'
 
-    const comp =   import ("./asyncComp.js")
-    const index = 2
-    let i = 0
-      const myComponent = defineAsyncComponent(
-        {
-            loader:()=>{
-                // return comp
-                return new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        console.log(i,'i==')
-                        if(i++ == 2){
-                            resolve({
-                                 render() {
-                                    return h('div', 'hello')
-                                }
-                            })
-                        }else{
-                            reject({
-                                render() {
-                                    return h('div', 'hello')
-                                }
-                            })
-                        }
-                    }, 3000);
+        //  模板编译网站
+        //  https://template-explorer.vuejs.org/#eyJzcmMiOiI8ZGl2PlxyXG48ZGl2PkhlbGxvIFdvcmxkPC9kaXY+XHJcbjxkaXY+e3tuYW1lfX08L2Rpdj5cclxuXHJcbjwvZGl2PiIsInNzciI6ZmFsc2UsIm9wdGlvbnMiOnt9fQ==
+
+        //   jsx或者h写法 得不到优化
+        // patchFlag 标记文本标记
+
+        const myComponent = {
+            setup(){
+                const state = reactive({
+                    name: 'Vue',
                 })
-            },
-            timeout:1000,
-            errorComponent:{
-                render(){
-                    return h('div', 'error ~~')
-                }
-            },
-            delay:500,
-            loadingComponent:{
-                render:()=>{
-                    return h('div', 'loading ~~')
-                }
-            },
-            onError(err,retry,fail,idx){
-                // console.log(err,retry,fail,i, '===')
                 setTimeout(() => {
-                    retry()
-                    console.log('重新加载中~~');
+                    state.name = 'Vue3'
                 }, 1000);
+                return {
+                    ...toRefs(state)
+                }
+               
+            },
+            // 标识是模板编译时加的
+            // 靶向更新：哪些节点有那些属性变化，只更新这些节点
+            render(_ctx) {
+                const vnode =  
+                (_openBlock(),
+                 _createElementBlock("div", null, [
+                    _createElementVNode("h1", null, "Hello World"),
+                    _createElementVNode(
+                        "span",
+                         null,
+                          _toDisplayString(_ctx.name), 
+                          1 /* TEXT */
+                        )
+                ]))
+                console.log(vnode, 'vnode');
+                return vnode
             }
-        })
-        render(h(myComponent,), app)
-   
+        }
+        // console.log(myComponent);
+        
+        render(h(myComponent), app)
+        
     </script>
 </body>
 </html>

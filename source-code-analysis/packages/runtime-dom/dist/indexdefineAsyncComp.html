@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>source-code-analysis</title>
+</head>
+<body>
+    <div id="app">
+    </div>
+    <style>
+        /* enterFrom  enterActive enterTo */
+        /* leaveFrom leaveActive LeaveTo */
+        .x-enter-active, .x-leave-active {
+            transition: opacity 1s ease-in-out;
+        }
+        .x-enter-from, .x-leave-to {
+            opacity: 0;
+        }
+    </style>
+    <script type="module">
+        // import { 
+        //     h,
+        //     createRenderer,
+        //     render,
+        //     Text,
+        //     ref,
+        //     Fragment,
+        //     getCurrentInstance,
+        //     Teleport,
+        //     provide,
+        //     inject,
+        //     onMounted,
+        //     onBeforeMount,
+        //     onBeforeUpdate,
+        //     onUpdated,
+        //     onBeforeUnmount,
+        //     KeepAlive,
+        //     Transition,
+        //     defineAsyncComponent
+        // } from './vue.runtime.esm-browser.min.js'
+
+        import {
+            h,
+            render,
+            Text,
+            Fragment,
+            Teleport,
+            ref,
+            provide,
+            inject,
+            onMounted,
+            onBeforeMount,
+            onBeforeUpdate,
+            onUpdated,
+            onBeforeUnmount,
+            getCurrentInstance,
+            KeepAlive,
+            Transition,
+            defineAsyncComponent
+         } from './runtime-dom.js'
+
+    const comp =   import ("./asyncComp.js")
+    const index = 2
+    let i = 0
+      const myComponent = defineAsyncComponent(
+        {
+            loader:()=>{
+                // return comp
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        console.log(i,'i==')
+                        if(i++ == 2){
+                            resolve({
+                                 render() {
+                                    return h('div', 'hello')
+                                }
+                            })
+                        }else{
+                            reject({
+                                render() {
+                                    return h('div', 'hello')
+                                }
+                            })
+                        }
+                    }, 3000);
+                })
+            },
+            timeout:1000,
+            errorComponent:{
+                render(){
+                    return h('div', 'error ~~')
+                }
+            },
+            delay:500,
+            loadingComponent:{
+                render:()=>{
+                    return h('div', 'loading ~~')
+                }
+            },
+            onError(err,retry,fail,idx){
+                // console.log(err,retry,fail,i, '===')
+                setTimeout(() => {
+                    retry()
+                    console.log('重新加载中~~');
+                }, 1000);
+            }
+        })
+        render(h(myComponent,), app)
+   
+    </script>
+</body>
+</html>
