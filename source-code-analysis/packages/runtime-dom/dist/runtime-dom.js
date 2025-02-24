@@ -202,7 +202,8 @@ function setupBlock(vnode) {
   return vnode;
 }
 function createElementBlock(type, props, children, patchFlag) {
-  return setupBlock(createVNode(type, props, children, patchFlag));
+  const vnode = createVNode(type, props, children, patchFlag);
+  return setupBlock(vnode);
 }
 function toDisplayString(val) {
   return val == null ? "" : isString(val) ? val : isObject(val) ? JSON.stringify(val) : String(val);

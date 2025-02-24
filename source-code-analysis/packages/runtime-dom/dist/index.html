@@ -55,8 +55,8 @@
             h,
             createElementVNode as _createElementVNode,
             toDisplayString as _toDisplayString,
-            openBlock as _openBlock,
             createElementBlock as _createElementBlock,
+            openBlock as _openBlock,
          } from './runtime-dom.js'
 
         //  模板编译网站
@@ -68,10 +68,11 @@
         const myComponent = {
             setup(){
                 const state = reactive({
-                    name: 'Vue',
+                    flag: true,
+                    a:'vue3'
                 })
                 setTimeout(() => {
-                    state.name = 'Vue3'
+                    state.flag = false
                 }, 1000);
                 return {
                     ...toRefs(state)
@@ -91,27 +92,114 @@
 //         "patchFlag": 1
 //     }
 // ]
-            render(_ctx) {
-                const vnode =  
-                (_openBlock(),
-                 _createElementBlock("div", null, [
-                    _createElementVNode("h1", null, "Hello World"),
-                    _createElementVNode(
-                        "span",
-                         null,
-                          _toDisplayString(_ctx.name), 
-                          1 /* TEXT */
-                        )
+            // render(_ctx) {
+            //     const vnode =  
+            //     (_openBlock(),
+            //      _createElementBlock("div", null, [
+            //         _createElementVNode("h1", null, "Hello World"),
+            //         _createElementVNode(
+            //             "span",
+            //              null,
+            //               _toDisplayString(_ctx.name), 
+            //               1 /* TEXT */
+            //             )
+            //     ]))
+            //     console.log(vnode, 'vnode');
+                
+            //     return vnode
+            // }
+
+            render(_ctx, _cache, $props, $setup, $data, $options) {
+                const vnode = (_openBlock(), _createElementBlock("div", null, [
+                    (_ctx.flag)
+                    ? (_openBlock(), _createElementBlock("p", { key: 0 }, [
+                        _createElementVNode("span", null, _toDisplayString(_ctx.a), 1 /* TEXT */)
+                        ]))
+                    : (_openBlock(), _createElementBlock("div", { key: 1 }, [
+                        _createElementVNode("span", null, _toDisplayString(_ctx.a), 1 /* TEXT */)
+                        ]))
                 ]))
                 console.log(vnode, 'vnode');
-                
                 return vnode
             }
         }
+        // blockTree 生成的树
         // console.log(myComponent);
-        
         render(h(myComponent), app)
         
     </script>
+
+    <!-- <div>
+    <div>Hello World</div>
+    <div >{{name}}</div>
+    
+    </div> -->
+    <!--  
+    blockTree
+    block收集block 防止混乱收集
+     -->
+    <!-- 不稳定结构 v-if -->
+    <!-- <div>
+        <p v-if="flag">
+            <span>{{a}}</span>
+        </p>
+        <div v-else>
+            <span>{{a}}</span>
+        </div>
+        
+    </div> -->
+<!-- 
+    v-for 不稳定结构
+     <div>
+        <p v-for="item in list" :key="item.id">
+            <span>{{item.name}}</span>
+        </p>
+    </div> 
+    子节点也会生产block 参数(true)表示不会被收集 不能靶向更新
+    创建一个Fragment 将子节点放到fragment 然后父节点收集fragment
+ =>   (_openBlock(), _createElementBlock("div", null, [
+       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.list, (item) => {
+      return (_openBlock(), _createElementBlock("p", {
+        key: item.id
+      }, [
+        _createElementVNode("span", null, _toDisplayString(item.name), 1 /* TEXT */)
+      ]))
+    }), 128 /* KEYED_FRAGMENT */))
+  ]))
+
+  稳定fragment  循环已知的次数 可以靶向更新
+ <div  v-for='item in 3'></div>
+=>  (_openBlock(), _createElementBlock(_Fragment, null, _renderList(3, (item) => {
+    return _createElementVNode("div")
+  }), 64 /* STABLE_FRAGMENT */))
+
+
+
+
+  预字符串化    
+  创建的元素一样且>20个，会转为字符串
+
+
+
+
+-->
+
+
+<!-- 编译模板 -->
+ <!--
+1. 语法转化为一个对象 ast 语法树 虚拟dom
+2. 对树进行优化 (打标记patchFlag)
+3. 根据转化后的代码生成字符串
+<span{{a}}></span>
+    {
+        type:'span',
+        children:a,
+        patchFlag:1
+    }
+createElementVnode('span',null,a,1)
+
+语法树使用 babel ts => js  es6 => es5
+https://astexplorer.net/
+ -->
 </body>
 </html>

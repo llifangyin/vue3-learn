@@ -71,8 +71,13 @@ export function setupBlock(vnode){
     return vnode
 }
 export function createElementBlock(type,props,children,patchFlag?){
+    const vnode = createVNode(type,props,children,patchFlag)
+    //todo block收集block 多层 防止混乱收集 针对v-if等
+    // if(currentBlock){
+    //     currentBlock.push(vnode)
+    // }
     // 收集子节点
-    return  setupBlock(createVNode(type,props,children,patchFlag))
+    return  setupBlock(vnode)
 
 }
 export function toDisplayString(val){

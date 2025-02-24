@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script type="module" >
+        import{ compiler } from "./compiler-core.js";
+        // 一般工程化 运行时对性能有要求，
+        // vue => runtime-dom => runtime-core => reactivity
+
+        let template = `<div a='1' >hello</div>`
+        console.log(compiler(template))
+    </script>
+</body>
+</html>
