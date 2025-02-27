@@ -22,6 +22,13 @@
                 <div></div>
             </div>`
         console.log(parse(template))
+        console.log(compile(template))
+
+        // 于 网站 https://template-explorer.vuejs.org/ 转化一致
+        // {createElementVnode:_createElementVnode,createElementBlock:_createElementBlock,openBlock:_openBlock} = Vue
+        // return function render(_ctx){
+        // return (_openBlock(),_createElementBlock())
+        // }
     </script>
 </body>
 </html>
