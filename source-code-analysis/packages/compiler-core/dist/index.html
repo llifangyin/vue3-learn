@@ -7,12 +7,21 @@
 </head>
 <body>
     <script type="module" >
-        import{ compiler } from "./compiler-core.js";
+        // https://astexplorer.net/ 语法解析器
+
+        import{
+             compile,
+             parse
+        } from "./compiler-core.js";
         // 一般工程化 运行时对性能有要求，
         // vue => runtime-dom => runtime-core => reactivity
 
-        let template = `<div a='1' >hello</div>`
-        console.log(compiler(template))
+        let template = `<div a='1' b ='2' >
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>`
+        console.log(parse(template))
     </script>
 </body>
 </html>
