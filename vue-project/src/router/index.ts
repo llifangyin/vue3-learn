@@ -57,7 +57,7 @@ const router = createRouter({
           {
             path: 'slot',
             name: 'slot',
-            component: () => import('../views/guide/slot.vue')
+            component: () => import('../views/guide/slot_test.vue')
           },
           {
             path: 'async',
